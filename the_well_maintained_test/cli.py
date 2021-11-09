@@ -26,7 +26,7 @@ def cli(url):
     package = parse_object.path.split('/')[-1]
     api_url = f'https://api.github.com/repos/{author}/{package}'
     changelog_url = f'https://raw.githubusercontent.com/{author}/{package}/main/CHANGELOG.md'
-    releases_url = f'https://api.github.com/{author}/{package}/releases'
+    releases_url = f'https://www.github.com/{author}/{package}/releases'
     releases_api_url = f'https://api.github.com/repos/{author}/{package}/releases'
     commits_url = f'https://api.github.com/repos/{author}/{package}/commits'
     workflows_url = f'https://api.github.com/repos/{author}/{package}/actions/workflows'
