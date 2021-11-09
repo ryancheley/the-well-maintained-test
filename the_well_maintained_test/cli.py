@@ -15,10 +15,16 @@ import requests
 def cli(url):
     """
     Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+
+    URL is a url to a github repository you'd like to check, for example:
+
+        the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+
     """
     parse_object = urlparse(url)
     author = parse_object.path.split('/')[-2]
     package = parse_object.path.split('/')[-1]
+    api_url = f'https://api.github.com/repos/{author}/{package}'
     changelog_url = f'https://raw.githubusercontent.com/{author}/{package}/main/CHANGELOG.md'
     releases_url = f'https://api.github.com/{author}/{package}/releases'
     releases_api_url = f'https://api.github.com/repos/{author}/{package}/releases'
@@ -97,7 +103,7 @@ def cli(url):
 
     click.echo("10. Does it seem relatively well used?")
 
-    r = requests.get(url).json()
+    r = requests.get(api_url).json()
     watchers = r.get('watchers')
     network_count = r.get('network_count')
     open_issues = r.get('open_issues')
