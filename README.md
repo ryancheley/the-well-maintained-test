@@ -5,7 +5,7 @@
 [![Tests](https://github.com/ryancheley/the-well-maintained-test/workflows/Test/badge.svg)](https://github.com/ryancheley/the-well-maintained-test/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/ryancheley/the-well-maintained-test/blob/master/LICENSE)
 
-Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+Programatically tries to answer the 12 questions from Adam Johnson's [blog post](https://adamj.eu/tech/2021/11/04/the-well-maintained-test/)
 
 ## Installation
 
@@ -15,7 +15,12 @@ Install this tool using `pip`:
 
 ## Usage
 
-Usage instructions go here.
+    Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+
+    URL is a url to a github repository you'd like to check, for example:
+
+        the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+
 
 ## Development
 
