@@ -9,10 +9,12 @@ from click.types import Choice
 import requests
 
 
+
 @click.command()
 @click.version_option()
 @click.argument("url")
-def cli(url):
+@click.option('--username' ,help='What GitHub Username you use')
+def cli(url, username):
     """
     Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
 
@@ -21,6 +23,10 @@ def cli(url):
         the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
 
     """
+    if username:
+        auth=(username, '')
+    else:
+        auth=()
     parse_object = urlparse(url)
     author = parse_object.path.split('/')[-2]
     package = parse_object.path.split('/')[-1]
@@ -32,8 +38,8 @@ def cli(url):
     workflows_url = f'https://api.github.com/repos/{author}/{package}/actions/workflows'
     ci_status_url = f'https://api.github.com/repos/{author}/{package}/actions/runs'
     bugs_url = f'https://api.github.com/repos/{author}/{package}/issues?labels=bug'
-    changelog = requests.get(changelog_url)
-    release = requests.get(releases_url)
+    changelog = requests.get(changelog_url, auth=auth)
+    release = requests.get(releases_url, auth=auth)
 
     answer_1 = click.prompt("1. Is it described as 'production ready'?", type=Choice(choices=['Yes','No']), show_choices=True)
     click.echo(f"\t{answer_1}")
@@ -49,13 +55,13 @@ def cli(url):
 
     click.echo("4. Is someone responding to bug reports?")
     BugComments = namedtuple('BugComments', ['text', 'create_date', 'bug_id'])
-    r = requests.get(bugs_url).json()
+    r = requests.get(bugs_url, auth=auth).json()
     bug_comment_list = []
     for i in r:
         bug_create_date = datetime.strptime(i.get('created_at'), '%Y-%m-%dT%H:%M:%SZ')
         bug_text = i.get('body')
         bug_id = i.get('number')
-        timeline = requests.get(i.get('timeline_url')).json()
+        timeline = requests.get(i.get('timeline_url', auth=auth)).json()
         for item in timeline:
             if item.get('event') == "commented":
                 bug_comment = item.get('body')
@@ -83,7 +89,7 @@ def cli(url):
     click.echo(f"\t{answer_7}")
 
     click.echo("8. Is there a Continuous Integration (CI) configuration?")
-    r = requests.get(workflows_url).json()
+    r = requests.get(workflows_url, auth=auth).json()
     if r.get('total_count') > 0:
         click.echo(f"\tThere are {r.get('total_count')} workflows")
         for i in r.get('workflows'):
@@ -93,7 +99,7 @@ def cli(url):
     
 
     click.echo("9. Is the CI passing?")
-    r = requests.get(ci_status_url).json()
+    r = requests.get(ci_status_url, auth=auth).json()
     conclusion = r.get('workflow_runs')[0].get('conclusion')
     if conclusion == "success":
         click.echo("\tYes")
@@ -103,7 +109,7 @@ def cli(url):
 
     click.echo("10. Does it seem relatively well used?")
 
-    r = requests.get(api_url).json()
+    r = requests.get(api_url, auth=auth).json()
     watchers = r.get('watchers')
     network_count = r.get('network_count')
     open_issues = r.get('open_issues')
@@ -115,7 +121,7 @@ def cli(url):
     click.echo(f"\t\tSubscribers: {subscribers_count}")     
 
     click.echo("11. Has there been a commit in the last year?")
-    r = requests.get(commits_url).json()
+    r = requests.get(commits_url, auth=auth).json()
     last_commit_date = r[0].get('commit').get('author').get('date')
     last_commit_date = datetime.strptime(last_commit_date, '%Y-%m-%dT%H:%M:%SZ')
     days_since_last_commit = (datetime.today() - last_commit_date).days
@@ -125,7 +131,7 @@ def cli(url):
         click.echo(f"\tYes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} which was {days_since_last_commit} days ago")
 
     click.echo("12. Has there been a release in the last year?")
-    r = requests.get(releases_api_url).json()
+    r = requests.get(releases_api_url, auth=auth).json()
     last_release_date = r[0].get('created_at')
     last_release_date = datetime.strptime(last_release_date, '%Y-%m-%dT%H:%M:%SZ')
     days_since_last_release = (datetime.today() - last_release_date).days
