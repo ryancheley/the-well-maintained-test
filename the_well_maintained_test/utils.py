@@ -4,8 +4,6 @@ import json
 from operator import attrgetter
 from urllib.parse import urlparse
 
-import click
-from click.types import Choice
 import requests
 from rich.prompt import Confirm
 from rich import print
