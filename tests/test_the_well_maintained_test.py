@@ -1,4 +1,7 @@
+from collections import namedtuple
 from datetime import datetime
+from io import StringIO
+from math import exp
 from click.testing import CliRunner
 import pytest
 import requests
@@ -39,8 +42,14 @@ def test_version():
 
 
 
-
-def test_yes_no(monkeypatch):
+@pytest.mark.parametrize(
+    "test_input,expected", 
+    [
+        ["y\n", "[bold green]\tYes[bold]"], 
+        ["n\n", "[bold red]\tNo[bold]"]
+    ]
+)
+def test_yes_no(monkeypatch, test_input, expected):
     """
         1. Is it described as 'production ready'?
         2. Is there sufficient documentation?
@@ -48,7 +57,9 @@ def test_yes_no(monkeypatch):
         6. Are the tests running with the latest Language version?
         7. Are the tests running with the latest Integration version?
     """
-    pass
+    number_inputs = StringIO(test_input)
+    monkeypatch.setattr('sys.stdin', number_inputs)
+    assert yes_no('test') == expected
 
 
 @pytest.mark.parametrize(
@@ -73,11 +84,23 @@ def test_changelog(test_input, expected):
     assert test == expected
 
 
-def test_bug_response_yes(monkeypatch):
+def test_bug_response_yes():
     """
         4. Is someone responding to bug reports?
     """
-    pass
+    url = 'https://api.github.com/repos/simonw/db-to-sqlite/issues'
+    auth=()
+    BugComments = namedtuple('BugComments', ['text', 'create_date', 'bug_id'])
+    today = datetime.now()
+    bug_turn_around_time_reply_days = (today - datetime(2019, 7, 9, 8, 19, 35, 916136)).days
+    bug_comment_list = [BugComments('Text', '', 37)]
+
+    days_since_last_bug_comment = (today - datetime(2021, 11, 6, 8, 49, 30, 916136)).days
+    expected = bug_responding(url, auth)
+    message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
+    message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
+    actual = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
+    assert expected == actual
 
 
 

@@ -3,7 +3,7 @@ from random import randrange
 
 today = datetime.now()
 random_days_good = -randrange(25, 250)
-random_days_bad = -randrange(350, 550)
+random_days_bad = -randrange(400, 600)
 
 
 GOOD_DATE = datetime.strftime(today + timedelta(days=random_days_good), '%Y-%m-%dT%H:%M:%SZ')
@@ -103,13 +103,9 @@ class MockResponseCISetUpNo:
 class MockResponseBugsYes:
     @staticmethod
     def json():
-        return [
-            {
-                "created_at": GOOD_DATE,
-                "number": 0,
-                "timeline_url": "test"
-            }
-        ]
+        return [{
+            "created_at": GOOD_DATE,"number": 0,"timeline_url": "test"
+        }]
 
 
 class MockResponseBugsNo:
