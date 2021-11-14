@@ -121,6 +121,8 @@ def test_ci_setup_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)    
     url = 'https://fakeurl'
     actual = ci_setup(url, auth)
+    expected = "[bold green]\tThere are 1 workflows[bold]\n[bold blue]\t - Test\n[bold]"
+    assert actual == expected
 
 
 def test_ci_setup_no(monkeypatch):
@@ -135,6 +137,8 @@ def test_ci_setup_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)    
     url = 'https://fakeurl'
     actual = ci_setup(url, auth)
+    expected = "[bold red]There is no CI set up![bold]"
+    assert actual == expected
 
 
 def test_ci_passing_yes(monkeypatch):
