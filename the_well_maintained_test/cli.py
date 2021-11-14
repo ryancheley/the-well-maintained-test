@@ -7,7 +7,17 @@ from urllib.parse import urlparse
 import click
 from click.types import Choice
 import requests
-
+from rich import print
+from .utils import (
+    yes_no, 
+    change_log_check, 
+    bug_responding, 
+    ci_setup, 
+    ci_passing, 
+    well_used,
+    commit_in_last_year,
+    release_in_last_year
+)
 
 
 @click.command()
@@ -27,6 +37,9 @@ def cli(url, username):
         auth=(username, '')
     else:
         auth=()
+    if url[-1] == '/':
+        url = url.strip('/')
+
     parse_object = urlparse(url)
     author = parse_object.path.split('/')[-2]
     package = parse_object.path.split('/')[-1]
@@ -41,101 +54,26 @@ def cli(url, username):
     changelog = requests.get(changelog_url, auth=auth)
     release = requests.get(releases_url, auth=auth)
 
-    answer_1 = click.prompt("1. Is it described as 'production ready'?", type=Choice(choices=['Yes','No']), show_choices=True)
-    click.echo(f"\t{answer_1}")
+    print(yes_no("1. Is it described as 'production ready'?"))
 
-    answer_2 = click.prompt("2. Is there sufficient documentation?", type=Choice(choices=['Yes','No']), show_choices=True)
-    click.echo(f"\t{answer_2}")
+    print(yes_no("2. Is there sufficient documentation?"))
 
-    click.echo("3. Is there a changelog?")
-    if changelog.status_code == 200 or release.status_code == 200:
-        click.echo("\tYes")
-    else:
-        click.echo("\tNo")
+    print(change_log_check(changelog, release))
 
-    click.echo("4. Is someone responding to bug reports?")
-    BugComments = namedtuple('BugComments', ['text', 'create_date', 'bug_id'])
-    r = requests.get(bugs_url, auth=auth).json()
-    bug_comment_list = []
-    for i in r:
-        bug_create_date = datetime.strptime(i.get('created_at'), '%Y-%m-%dT%H:%M:%SZ')
-        bug_text = i.get('body')
-        bug_id = i.get('number')
-        timeline = requests.get(i.get('timeline_url', auth=auth)).json()
-        for item in timeline:
-            if item.get('event') == "commented":
-                bug_comment = item.get('body')
-                bug_comment_date = datetime.strptime(item.get('created_at'), '%Y-%m-%dT%H:%M:%SZ')
-                bug_comment_list.append(BugComments(bug_comment, bug_comment_date, bug_id))
-    bug_comment_list = sorted(bug_comment_list, key=attrgetter('create_date'), reverse=True)
-    if bug_comment_list:
-        bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
-        days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
-        message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
-        message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-        click.echo(f"\t{message1}")
-        click.echo(f"\t{message2}")
-    else:
-        click.echo("\tThere have been no bugs reported that are still open.")
+    print(bug_responding(bugs_url, auth))
 
+    print(yes_no("5. Are there sufficient tests?"))
 
-    answer_5 = click.prompt("5. Are there sufficient tests?", type=Choice(choices=['Yes','No']), show_choices=True)
-    click.echo(f"\t{answer_5}")
+    print(yes_no("6. Are the tests running with the latest Language version?"))
 
-    answer_6 = click.prompt("6. Are the tests running with the latest Language version?", type=Choice(choices=['Yes','No']), show_choices=True)
-    click.echo(f"\t{answer_6}")
+    print(yes_no("7. Are the tests running with the latest Integration version?"))
 
-    answer_7 = click.prompt("7. Are the tests running with the latest Integration version?", type=Choice(choices=['Yes','No']), show_choices=True)
-    click.echo(f"\t{answer_7}")
+    print(ci_setup(workflows_url, auth))
 
-    click.echo("8. Is there a Continuous Integration (CI) configuration?")
-    r = requests.get(workflows_url, auth=auth).json()
-    if r.get('total_count') > 0:
-        click.echo(f"\tThere are {r.get('total_count')} workflows")
-        for i in r.get('workflows'):
-            click.echo(f"\t\t- {i.get('name')}")
-    else:
-        click.echo("There is no CI set up!")
-    
+    print(ci_passing(ci_status_url, auth))
 
-    click.echo("9. Is the CI passing?")
-    r = requests.get(ci_status_url, auth=auth).json()
-    conclusion = r.get('workflow_runs')[0].get('conclusion')
-    if conclusion == "success":
-        click.echo("\tYes")
-    else:
-        click.echo("\tNo")
+    print(well_used(api_url, auth))
 
+    print(commit_in_last_year(commits_url, auth))
 
-    click.echo("10. Does it seem relatively well used?")
-
-    r = requests.get(api_url, auth=auth).json()
-    watchers = r.get('watchers')
-    network_count = r.get('network_count')
-    open_issues = r.get('open_issues')
-    subscribers_count = r.get('subscribers_count')
-    click.echo("\tThe project has the following statistics:")
-    click.echo(f"\t\tWatchers: {watchers}")
-    click.echo(f"\t\tForks: {network_count}")
-    click.echo(f"\t\tOpen Issues: {open_issues}")
-    click.echo(f"\t\tSubscribers: {subscribers_count}")     
-
-    click.echo("11. Has there been a commit in the last year?")
-    r = requests.get(commits_url, auth=auth).json()
-    last_commit_date = r[0].get('commit').get('author').get('date')
-    last_commit_date = datetime.strptime(last_commit_date, '%Y-%m-%dT%H:%M:%SZ')
-    days_since_last_commit = (datetime.today() - last_commit_date).days
-    if days_since_last_commit > 365:
-        click.echo(f"\tNo. The last commit was {days_since_last_commit} days ago")
-    else:
-        click.echo(f"\tYes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} which was {days_since_last_commit} days ago")
-
-    click.echo("12. Has there been a release in the last year?")
-    r = requests.get(releases_api_url, auth=auth).json()
-    last_release_date = r[0].get('created_at')
-    last_release_date = datetime.strptime(last_release_date, '%Y-%m-%dT%H:%M:%SZ')
-    days_since_last_release = (datetime.today() - last_release_date).days
-    if days_since_last_release > 365:
-        click.echo(f"\tNo. The last commit was {days_since_last_release} days ago")
-    else:
-        click.echo(f"\tYes. The last commit was on {datetime.strftime(last_release_date, '%m-%d-%Y')} which was {days_since_last_release} days ago")
+    print(release_in_last_year(releases_api_url, auth))

@@ -31,7 +31,7 @@ setup(
         [console_scripts]
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
-    install_requires=["click", "requests"],
+    install_requires=["click", "requests", "rich"],
     extras_require={
         "test": ["pytest"]
     },
