@@ -19,6 +19,11 @@ from tests.test_classes import (
     MockResponseCISetUpNo,
     MockResponseBugsYes,
     MockResponseBugsNo,
+    MockResponseProductionReadyYes,
+    MockResponseProductionReadyNoAlpha,
+    MockResponseProductionReadyNoBeta,
+    MockResponseProductionReadyNoOther,
+
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.utils import (
@@ -29,7 +34,8 @@ from the_well_maintained_test.utils import (
     ci_passing, 
     well_used,
     commit_in_last_year,
-    release_in_last_year
+    release_in_last_year,
+    production_ready_check
 )
 
 
@@ -51,7 +57,6 @@ def test_version():
 )
 def test_yes_no(monkeypatch, test_input, expected):
     """
-        1. Is it described as 'production ready'?
         2. Is there sufficient documentation?
         5. Are there sufficient tests?
         6. Are the tests running with the latest Language version?
@@ -92,10 +97,10 @@ def test_bug_response_yes():
     auth=()
     BugComments = namedtuple('BugComments', ['text', 'create_date', 'bug_id'])
     today = datetime.now()
-    bug_turn_around_time_reply_days = (today - datetime(2019, 7, 9, 8, 19, 35, 916136)).days
+    bug_turn_around_time_reply_days = (today - datetime(2019, 7, 10)).days
     bug_comment_list = [BugComments('Text', '', 37)]
 
-    days_since_last_bug_comment = (today - datetime(2021, 11, 6, 8, 49, 30, 916136)).days
+    days_since_last_bug_comment = (today - datetime(2021, 11, 6)).days
     expected = bug_responding(url, auth)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
@@ -290,3 +295,65 @@ def test_release_in_last_year_no(monkeypatch):
     assert actual == expected
 
 
+def test_production_ready_check_yes(monkeypatch):
+    """
+        1. Is it described as 'production ready'?
+    """
+    auth=()
+    def mock_get(*args, **kwargs):
+            return MockResponseProductionReadyYes()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = production_ready_check(url, auth)
+    expected = f"[bold green]\tYes. The version is 1.0[bold]"
+    assert actual == expected
+
+
+def test_production_ready_check_no_alpha(monkeypatch):
+    """
+        1. Is it described as 'production ready'?
+    """
+    auth=()
+    def mock_get(*args, **kwargs):
+            return MockResponseProductionReadyNoAlpha()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = production_ready_check(url, auth)
+    expected = f"[bold red]\tNo. The version is 1.0a which indicates an alpha version[bold]"
+    assert actual == expected
+
+
+def test_production_ready_check_no_beta(monkeypatch):
+    """
+        1. Is it described as 'production ready'?
+    """
+    auth=()
+    def mock_get(*args, **kwargs):
+            return MockResponseProductionReadyNoBeta()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = production_ready_check(url, auth)
+    expected = f"[bold red]\tNo. The version is 1.0b which indicates a beta version[bold]"
+    assert actual == expected
+
+
+def test_production_ready_check_no_other(monkeypatch):
+    """
+        1. Is it described as 'production ready'?
+    """
+    auth=()
+    def mock_get(*args, **kwargs):
+            return MockResponseProductionReadyNoOther()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = production_ready_check(url, auth)
+    expected = f"[bold red]\tNo.[bold]" 
+    assert actual == expected

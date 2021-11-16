@@ -16,7 +16,8 @@ from .utils import (
     ci_passing, 
     well_used,
     commit_in_last_year,
-    release_in_last_year
+    release_in_last_year,
+    production_ready_check
 )
 
 
@@ -51,10 +52,11 @@ def cli(url, username):
     workflows_url = f'https://api.github.com/repos/{author}/{package}/actions/workflows'
     ci_status_url = f'https://api.github.com/repos/{author}/{package}/actions/runs'
     bugs_url = f'https://api.github.com/repos/{author}/{package}/issues?labels=bug'
+    language_url = f'https://api.github.com/repos/{author}/{package}/languages'
     changelog = requests.get(changelog_url, auth=auth)
     release = requests.get(releases_url, auth=auth)
 
-    print(yes_no("1. Is it described as 'production ready'?"))
+    print(production_ready_check(releases_api_url))
 
     print(yes_no("2. Is there sufficient documentation?"))
 

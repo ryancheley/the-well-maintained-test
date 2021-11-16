@@ -15,7 +15,25 @@ def yes_no(question):
         return "[bold green]\tYes[bold]"
     else:
         return "[bold red]\tNo[bold]"
-    
+
+def production_ready_check(release, auth):
+    print("1. Is it described as 'production ready'?")
+    r = requests.get(release).json()
+    version = r[0].get('name')
+    try:
+        float(version)
+        return f"[bold green]\tYes. The version is {version}[bold]"
+    except ValueError:
+        if 'a' in version:
+            return f"[bold red]\tNo. The version is {version} which indicates an alpha version[bold]"
+        elif 'b' in version:
+            return f"[bold red]\tNo. The version is {version} which indicates a beta version[bold]"
+        else:
+            return f"[bold red]\tNo.[bold]"
+
+
+
+
 def change_log_check(changelog, release):
     print("3. Is there a changelog?")
     if changelog.status_code == 200 or release.status_code == 200:
