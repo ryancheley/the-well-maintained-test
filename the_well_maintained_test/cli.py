@@ -17,7 +17,10 @@ from .utils import (
     well_used,
     commit_in_last_year,
     release_in_last_year,
-    production_ready_check
+    production_ready_check,
+    documentation_exists,
+    language_check,
+    framework_check
 )
 
 
@@ -59,7 +62,7 @@ def cli(url, username):
 
     print(production_ready_check(pypi_url))
 
-    print(yes_no("2. Is there sufficient documentation?"))
+    print(documentation_exists(pypi_url))
 
     print(change_log_check(changelog, release))
 
@@ -67,9 +70,9 @@ def cli(url, username):
 
     print(yes_no("5. Are there sufficient tests?"))
 
-    print(yes_no("6. Are the tests running with the latest Language version?"))
+    print(language_check(pypi_url))
 
-    print(yes_no("7. Are the tests running with the latest Integration version?"))
+    print(framework_check(pypi_url))
 
     print(ci_setup(workflows_url, auth))
 

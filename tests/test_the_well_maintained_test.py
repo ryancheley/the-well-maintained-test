@@ -17,16 +17,19 @@ from tests.test_classes import (
     MockResponseReleasesNo,
     MockResponseCISetUpYes,
     MockResponseCISetUpNo,
-    MockResponseBugsYes,
     MockResponseBugsNo,
     MockResponseProductionReadyYes,
     MockResponseProductionReadyNo,
     MockResponseDocumentationYes,
     MockResponseDocumentationNo,
+    MockResponseFrameworkCheck,
+    MockResponseLanguageCheck,
 
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.utils import (
+    framework_check,
+    language_check,
     yes_no, 
     change_log_check, 
     bug_responding, 
@@ -355,3 +358,49 @@ def test_document_exists_no(monkeypatch):
     assert actual == expected
 
 
+def test_language_check(monkeypatch):
+    """
+        6. Are the tests running with the latest Language version?
+    """
+
+    def mock_get(*args, **kwargs):
+        return MockResponseLanguageCheck()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = language_check(url)
+    expected = f"\t[bold blue]The project supports the following programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
+    assert actual == expected
+
+
+def test_framework_check_exists(monkeypatch):
+    """
+        7. Are the tests running with the latest Integration version?
+    """
+
+    def mock_get(*args, **kwargs):
+        return MockResponseFrameworkCheck()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = framework_check(url)
+    expected = f"\t[bold blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
+    assert actual == expected
+
+
+def test_framework_check_does_not_exist(monkeypatch):
+    """
+        7. Are the tests running with the latest Integration version?
+    """
+
+    def mock_get(*args, **kwargs):
+        return MockResponseLanguageCheck()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = framework_check(url)
+    expected = f"\t[bold blue]This project has no associated frameworks"
+    assert actual == expected

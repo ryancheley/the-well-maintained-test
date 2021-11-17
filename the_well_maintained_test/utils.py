@@ -87,6 +87,36 @@ def bug_responding(bugs_url, auth):
         return "\t[bold green]There have been no bugs reported that are still open.[bold]"
 
 
+def language_check(pypi_url):
+    """
+        6. Are the tests running with the latest Language version?
+    """
+    print("1. Is it described as 'production ready'?")
+    response = requests.get(pypi_url).json()
+    classifiers = response.get('info').get('classifiers')
+    languages = [s.replace('Programming Language :: Python :: ', 'Python ') for s in classifiers if 'Programming Language' in s]
+    message = "\t[bold blue]The project supports the following programming languages[bold]\n"
+    for language in languages:
+        message += f"\t\t- {language}\n"
+    return message
+
+
+def framework_check(pypi_url):
+    """
+        7. Are the tests running with the latest Integration version?
+    """
+    print("1. Is it described as 'production ready'?")
+    response = requests.get(pypi_url).json()
+    classifiers = response.get('info').get('classifiers')
+    frameworks = [s.replace('Framework Django', 'Framework').replace(' ::', '') for s in classifiers if 'Framework' in s]
+    if frameworks:
+        framework = [s for s in classifiers if 'Framework' in s][-1].replace(' :: ', ' ')
+        message = f"\t[bold blue]The project supports the following framework as it's latest[bold] {framework}"
+    else:
+        message = "\t[bold blue]This project has no associated frameworks"
+    return message
+
+
 def ci_setup(workflows_url, auth):
     print("8. Is there a Continuous Integration (CI) configuration?")
     r = requests.get(workflows_url, auth=auth).json()

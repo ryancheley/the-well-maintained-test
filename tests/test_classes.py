@@ -100,14 +100,6 @@ class MockResponseCISetUpNo:
         }
 
 
-class MockResponseBugsYes:
-    @staticmethod
-    def json():
-        return [{
-            "created_at": GOOD_DATE,"number": 0,"timeline_url": "test"
-        }]
-
-
 class MockResponseBugsNo:
     @staticmethod
     def json():
@@ -157,3 +149,25 @@ class MockResponseDocumentationNo:
                 }
             }
             }
+
+
+class MockResponseLanguageCheck:
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "classifiers": ["Development Status :: 3 - Alpha","Intended Audience :: Developers","Intended Audience :: End Users/Desktop","Intended Audience :: Science/Research","License :: OSI Approved :: Apache Software License","Programming Language :: Python :: 3.6","Programming Language :: Python :: 3.7","Topic :: Database"],
+            }
+            }
+
+
+class MockResponseFrameworkCheck:
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "classifiers": ["Development Status :: 4 - Beta","Environment :: Web Environment","Framework :: Django","Framework :: Django :: 2.0","Framework :: Django :: 2.1","Framework :: Django :: 2.2","Framework :: Django :: 3.0","Framework :: Django :: 3.1","Framework :: Django :: 3.2","Intended Audience :: Developers","License :: OSI Approved :: MIT License","Operating System :: OS Independent","Programming Language :: Python","Programming Language :: Python :: 3","Programming Language :: Python :: 3.5","Programming Language :: Python :: 3.6","Programming Language :: Python :: 3.7","Programming Language :: Python :: 3.8","Programming Language :: Python :: 3.9","Topic :: Internet","Topic :: Software Development :: Libraries :: Python Modules"],
+                "version": "0.5"
+            }
+            }
+
