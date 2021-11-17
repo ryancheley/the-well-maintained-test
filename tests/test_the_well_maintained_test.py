@@ -21,6 +21,8 @@ from tests.test_classes import (
     MockResponseBugsNo,
     MockResponseProductionReadyYes,
     MockResponseProductionReadyNo,
+    MockResponseDocumentationYes,
+    MockResponseDocumentationNo,
 
 )
 from the_well_maintained_test.cli import cli
@@ -33,7 +35,8 @@ from the_well_maintained_test.utils import (
     well_used,
     commit_in_last_year,
     release_in_last_year,
-    production_ready_check
+    production_ready_check,
+    documentation_exists,
 )
 
 
@@ -55,7 +58,6 @@ def test_version():
 )
 def test_yes_no(monkeypatch, test_input, expected):
     """
-        2. Is there sufficient documentation?
         5. Are there sufficient tests?
         6. Are the tests running with the latest Language version?
         7. Are the tests running with the latest Integration version?
@@ -113,7 +115,7 @@ def test_bug_response_no(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseBugsNo()
+        return MockResponseBugsNo()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -130,7 +132,7 @@ def test_ci_setup_yes(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCISetUpYes()
+        return MockResponseCISetUpYes()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -146,7 +148,7 @@ def test_ci_setup_no(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCISetUpNo()
+        return MockResponseCISetUpNo()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -162,7 +164,7 @@ def test_ci_passing_yes(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCIPassing()
+        return MockResponseCIPassing()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -178,7 +180,7 @@ def test_ci_passing_no(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCIFailing()
+        return MockResponseCIFailing()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -216,7 +218,7 @@ def test_commit_in_last_year_yes(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCommitsYes()
+        return MockResponseCommitsYes()
 
     today = datetime.now()
     test_date = datetime.strptime(GOOD_DATE, '%Y-%m-%dT%H:%M:%SZ')
@@ -237,7 +239,7 @@ def test_commit_in_last_year_no(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseCommitsNo()
+        return MockResponseCommitsNo()
 
     today = datetime.now()
     test_date = datetime.strptime(BAD_DATE, '%Y-%m-%dT%H:%M:%SZ')
@@ -258,7 +260,7 @@ def test_release_in_last_year_yes(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseReleasesYes()
+        return MockResponseReleasesYes()
 
     today = datetime.now()
     test_date = datetime.strptime(GOOD_DATE, '%Y-%m-%dT%H:%M:%SZ')
@@ -279,7 +281,7 @@ def test_release_in_last_year_no(monkeypatch):
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseReleasesNo()
+        return MockResponseReleasesNo()
 
     today = datetime.now()
     test_date = datetime.strptime(BAD_DATE, '%Y-%m-%dT%H:%M:%SZ')
@@ -297,9 +299,8 @@ def test_production_ready_check_yes(monkeypatch):
     """
         1. Is it described as 'production ready'?
     """
-    auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseProductionReadyYes()
+        return MockResponseProductionReadyYes()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
@@ -313,15 +314,44 @@ def test_production_ready_check_no(monkeypatch):
     """
         1. Is it described as 'production ready'?
     """
-    auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseProductionReadyNo()
+        return MockResponseProductionReadyNo()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
     url = 'https://fakeurl'
     actual = production_ready_check(url)
     expected = f"\t[bold red]\tThere is no Development Status for this package. It is currently at version 0.5[bold]"
+    assert actual == expected
+
+
+def test_document_exists_yes(monkeypatch):
+    """
+        2. Is there sufficient documentation?
+    """
+    def mock_get(*args, **kwargs):
+        return MockResponseDocumentationYes()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = documentation_exists(url)
+    expected = "\t[bold green]Documentation can be found at https://github.com/simonw/db-to-sqlite/blob/main/README.md[bold]"
+    assert actual == expected
+
+
+def test_document_exists_no(monkeypatch):
+    """
+        2. Is there sufficient documentation?
+    """
+    def mock_get(*args, **kwargs):
+        return MockResponseDocumentationNo()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)    
+    url = 'https://fakeurl'
+    actual = documentation_exists(url)
+    expected = "\t[bold red]There is no documentation for this project[bold]"
     assert actual == expected
 
 

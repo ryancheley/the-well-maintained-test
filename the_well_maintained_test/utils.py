@@ -20,9 +20,9 @@ def yes_no(question):
     else:
         return "[bold red]\tNo[bold]"
 
-def production_ready_check(release):
+def production_ready_check(pypi_api_url):
     print("1. Is it described as 'production ready'?")
-    response = requests.get(release).json()
+    response = requests.get(pypi_api_url).json()
     classifiers = response.get('info').get('classifiers')
     version = response.get('info').get('version')
     development_status = []
@@ -37,6 +37,17 @@ def production_ready_check(release):
         message = f"\t[bold green]The project is set to Development Status[bold] [blue]{status}"
     else:
         message =  f"\t[bold red]\tThere is no Development Status for this package. It is currently at version {version}[bold]"
+    return message
+
+
+def documentation_exists(pypi_api_url):
+    print("2. Is there sufficient documentation?")
+    response = requests.get(pypi_api_url).json()
+    docs = response.get('info').get('project_urls').get('Documentation')
+    if docs:
+        message = f"\t[bold green]Documentation can be found at {docs}[bold]"
+    else:
+        message = "\t[bold red]There is no documentation for this project[bold]"
     return message
 
 

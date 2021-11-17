@@ -133,3 +133,27 @@ class MockResponseProductionReadyNo:
                 "version": "0.5"
             }
             }
+
+
+class MockResponseDocumentationYes:
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    "Documentation": "https://github.com/simonw/db-to-sqlite/blob/main/README.md"
+                }
+            }
+            }
+
+
+class MockResponseDocumentationNo:
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    
+                }
+            }
+            }
