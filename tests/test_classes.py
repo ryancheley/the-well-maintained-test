@@ -113,26 +113,23 @@ class MockResponseBugsNo:
     def json():
         return {}
 
-
 class MockResponseProductionReadyYes:
     @staticmethod
     def json():
-        return [{"name": "1.0"}]
+        return {
+            "info": {
+                "classifiers": [
+                    'Development Status :: 3 - Alpha'
+                ]
+                }
+            }
 
-
-class MockResponseProductionReadyNoAlpha:
+class MockResponseProductionReadyNo:
     @staticmethod
     def json():
-        return [{"name": "1.0a"}]
-
-
-class MockResponseProductionReadyNoBeta:
-    @staticmethod
-    def json():
-        return [{"name": "1.0b"}]
-
-
-class MockResponseProductionReadyNoOther:
-    @staticmethod
-    def json():
-        return [{"name": "1.0c"}]
+        return {
+            "info": {
+                "classifiers": [],
+                "version": "0.5"
+            }
+            }

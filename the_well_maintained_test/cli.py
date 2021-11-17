@@ -55,27 +55,28 @@ def cli(url, username):
     language_url = f'https://api.github.com/repos/{author}/{package}/languages'
     changelog = requests.get(changelog_url, auth=auth)
     release = requests.get(releases_url, auth=auth)
+    pypi_url = f"https://pypi.org/pypi/{package}/json"
 
-    print(production_ready_check(releases_api_url))
+    print(production_ready_check(pypi_url))
 
-    print(yes_no("2. Is there sufficient documentation?"))
+    # print(yes_no("2. Is there sufficient documentation?"))
 
-    print(change_log_check(changelog, release))
+    # print(change_log_check(changelog, release))
 
-    print(bug_responding(bugs_url, auth))
+    # print(bug_responding(bugs_url, auth))
 
-    print(yes_no("5. Are there sufficient tests?"))
+    # print(yes_no("5. Are there sufficient tests?"))
 
-    print(yes_no("6. Are the tests running with the latest Language version?"))
+    # print(yes_no("6. Are the tests running with the latest Language version?"))
 
-    print(yes_no("7. Are the tests running with the latest Integration version?"))
+    # print(yes_no("7. Are the tests running with the latest Integration version?"))
 
-    print(ci_setup(workflows_url, auth))
+    # print(ci_setup(workflows_url, auth))
 
-    print(ci_passing(ci_status_url, auth))
+    # print(ci_passing(ci_status_url, auth))
 
-    print(well_used(api_url, auth))
+    # print(well_used(api_url, auth))
 
-    print(commit_in_last_year(commits_url, auth))
+    # print(commit_in_last_year(commits_url, auth))
 
-    print(release_in_last_year(releases_api_url, auth))
+    # print(release_in_last_year(releases_api_url, auth))

@@ -2,9 +2,13 @@ from collections import namedtuple
 from datetime import datetime, time
 import json
 from operator import attrgetter
+from os import device_encoding
+import re
 from urllib.parse import urlparse
+from click.decorators import make_pass_decorator
 
 import requests
+from requests.api import request
 from rich.prompt import Confirm
 from rich import print
 
@@ -16,21 +20,24 @@ def yes_no(question):
     else:
         return "[bold red]\tNo[bold]"
 
-def production_ready_check(release, auth):
+def production_ready_check(release):
     print("1. Is it described as 'production ready'?")
-    r = requests.get(release).json()
-    version = r[0].get('name')
+    response = requests.get(release).json()
+    classifiers = response.get('info').get('classifiers')
+    version = response.get('info').get('version')
+    development_status = []
     try:
-        float(version)
-        return f"[bold green]\tYes. The version is {version}[bold]"
-    except ValueError:
-        if 'a' in version:
-            return f"[bold red]\tNo. The version is {version} which indicates an alpha version[bold]"
-        elif 'b' in version:
-            return f"[bold red]\tNo. The version is {version} which indicates a beta version[bold]"
-        else:
-            return f"[bold red]\tNo.[bold]"
-
+        development_status = [s for s in classifiers if 'Development Status' in s][0]
+        development_status_str_len = len(development_status)
+        development_status_start_point = re.search(r'Development Status :: [\d] \- ', development_status).span(0)[1]
+        status = development_status[(development_status_start_point-development_status_str_len):]
+    except IndexError:
+        pass
+    if development_status:
+        message = f"\t[bold green]The project is set to Development Status[bold] [blue]{status}"
+    else:
+        message =  f"\t[bold red]\tThere is no Development Status for this package. It is currently at version {version}[bold]"
+    return message
 
 
 

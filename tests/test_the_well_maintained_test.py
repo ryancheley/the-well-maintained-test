@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, date
 from io import StringIO
 from math import exp
 from click.testing import CliRunner
@@ -20,9 +20,7 @@ from tests.test_classes import (
     MockResponseBugsYes,
     MockResponseBugsNo,
     MockResponseProductionReadyYes,
-    MockResponseProductionReadyNoAlpha,
-    MockResponseProductionReadyNoBeta,
-    MockResponseProductionReadyNoOther,
+    MockResponseProductionReadyNo,
 
 )
 from the_well_maintained_test.cli import cli
@@ -96,11 +94,11 @@ def test_bug_response_yes():
     url = 'https://api.github.com/repos/simonw/db-to-sqlite/issues'
     auth=()
     BugComments = namedtuple('BugComments', ['text', 'create_date', 'bug_id'])
-    today = datetime.now()
-    bug_turn_around_time_reply_days = (today - datetime(2019, 7, 10)).days
+    today = date.today()
+    bug_turn_around_time_reply_days = (today - date(2019, 7, 11)).days
     bug_comment_list = [BugComments('Text', '', 37)]
 
-    days_since_last_bug_comment = (today - datetime(2021, 11, 6)).days
+    days_since_last_bug_comment = (today - date(2021, 11, 6)).days
     expected = bug_responding(url, auth)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
@@ -306,54 +304,24 @@ def test_production_ready_check_yes(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
     url = 'https://fakeurl'
-    actual = production_ready_check(url, auth)
-    expected = f"[bold green]\tYes. The version is 1.0[bold]"
+    actual = production_ready_check(url)
+    expected = f"\t[bold green]The project is set to Development Status[bold] [blue]Alpha"
     assert actual == expected
 
 
-def test_production_ready_check_no_alpha(monkeypatch):
+def test_production_ready_check_no(monkeypatch):
     """
         1. Is it described as 'production ready'?
     """
     auth=()
     def mock_get(*args, **kwargs):
-            return MockResponseProductionReadyNoAlpha()
+            return MockResponseProductionReadyNo()
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)    
     url = 'https://fakeurl'
-    actual = production_ready_check(url, auth)
-    expected = f"[bold red]\tNo. The version is 1.0a which indicates an alpha version[bold]"
+    actual = production_ready_check(url)
+    expected = f"\t[bold red]\tThere is no Development Status for this package. It is currently at version 0.5[bold]"
     assert actual == expected
 
 
-def test_production_ready_check_no_beta(monkeypatch):
-    """
-        1. Is it described as 'production ready'?
-    """
-    auth=()
-    def mock_get(*args, **kwargs):
-            return MockResponseProductionReadyNoBeta()
-
-    # apply the monkeypatch for requests.get to mock_get
-    monkeypatch.setattr(requests, "get", mock_get)    
-    url = 'https://fakeurl'
-    actual = production_ready_check(url, auth)
-    expected = f"[bold red]\tNo. The version is 1.0b which indicates a beta version[bold]"
-    assert actual == expected
-
-
-def test_production_ready_check_no_other(monkeypatch):
-    """
-        1. Is it described as 'production ready'?
-    """
-    auth=()
-    def mock_get(*args, **kwargs):
-            return MockResponseProductionReadyNoOther()
-
-    # apply the monkeypatch for requests.get to mock_get
-    monkeypatch.setattr(requests, "get", mock_get)    
-    url = 'https://fakeurl'
-    actual = production_ready_check(url, auth)
-    expected = f"[bold red]\tNo.[bold]" 
-    assert actual == expected
