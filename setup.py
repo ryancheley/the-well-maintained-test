@@ -1,5 +1,6 @@
-from setuptools import setup
 import os
+
+from setuptools import setup
 
 VERSION = "0.2.0"
 
@@ -14,7 +15,8 @@ def get_long_description():
 
 setup(
     name="the-well-maintained-test",
-    description="Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/",
+    description="Programatically tries to answer the 12 questions from \
+        Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     author="Ryan Cheley",
@@ -32,8 +34,6 @@ setup(
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
     install_requires=["click", "requests", "rich"],
-    extras_require={
-        "test": ["pytest", "black", "isort"]
-    },
+    extras_require={"test": ["pytest", "black", "isort"]},
     python_requires=">=3.7",
 )

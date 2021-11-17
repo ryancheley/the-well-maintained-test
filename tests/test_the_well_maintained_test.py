@@ -1,7 +1,6 @@
 from collections import namedtuple
 from datetime import date, datetime
 from io import StringIO
-from math import exp
 
 import pytest
 import requests
@@ -102,7 +101,9 @@ def test_bug_response_yes():
 
     days_since_last_bug_comment = (today - date(2021, 11, 6)).days
     expected = bug_responding(url, auth)
-    message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
+    message1 = f"The maintainer took \
+        {bug_turn_around_time_reply_days} days to respond to the bug report \
+        {bug_comment_list[0].bug_id}"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
     actual = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
     assert expected == actual
@@ -121,9 +122,7 @@ def test_bug_response_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = bug_responding(url, auth)
-    expected = (
-        "\t[bold green]There have been no bugs reported that are still open.[bold]"
-    )
+    expected = "\t[bold green]There have been no bugs reported that are still open.[bold]"
     assert actual == expected
 
 
@@ -209,10 +208,10 @@ def test_well_used(monkeypatch):
     url = "https://fakeurl"
     actual = well_used(url, auth)
     message = "\tThe project has the following statistics:\n"
-    message += f"\t- Watchers: 5\n"
-    message += f"\t- Forks: 6\n"
-    message += f"\t- Open Issues: 6\n"
-    message += f"\t- Subscribers: 10"
+    message += "\t- Watchers: 5\n"
+    message += "\t- Forks: 6\n"
+    message += "\t- Open Issues: 6\n"
+    message += "\t- Subscribers: 10"
 
     expected = message
     assert actual == expected
@@ -315,9 +314,7 @@ def test_production_ready_check_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = production_ready_check(url)
-    expected = (
-        f"\t[bold green]The project is set to Development Status[bold] [blue]Alpha"
-    )
+    expected = "\t[bold green]The project is set to Development Status[bold] [blue]Alpha"
     assert actual == expected
 
 
@@ -333,7 +330,7 @@ def test_production_ready_check_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = production_ready_check(url)
-    expected = f"\t[bold red]\tThere is no Development Status for this package. It is currently at version 0.5[bold]"
+    expected = "\t[bold red]\tThere is no Development Status for this package. It is currently at version 0.5[bold]"
     assert actual == expected
 
 
@@ -381,7 +378,8 @@ def test_language_check(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = language_check(url)
-    expected = f"\t[bold blue]The project supports the following programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
+    expected = "\t[bold blue]The project supports the following \
+        programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
     assert actual == expected
 
 
@@ -397,7 +395,7 @@ def test_framework_check_exists(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = f"\t[bold blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
+    expected = "\t[bold blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
     assert actual == expected
 
 
@@ -413,5 +411,5 @@ def test_framework_check_does_not_exist(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = f"\t[bold blue]This project has no associated frameworks"
+    expected = "\t[bold blue]This project has no associated frameworks"
     assert actual == expected

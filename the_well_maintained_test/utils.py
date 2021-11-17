@@ -1,14 +1,9 @@
-import json
 import re
 from collections import namedtuple
-from datetime import datetime, time
+from datetime import datetime
 from operator import attrgetter
-from os import device_encoding
-from urllib.parse import urlparse
 
 import requests
-from click.decorators import make_pass_decorator
-from requests.api import request
 from rich import print
 from rich.prompt import Confirm
 
@@ -30,12 +25,8 @@ def production_ready_check(pypi_api_url):
     try:
         development_status = [s for s in classifiers if "Development Status" in s][0]
         development_status_str_len = len(development_status)
-        development_status_start_point = re.search(
-            r"Development Status :: [\d] \- ", development_status
-        ).span(0)[1]
-        status = development_status[
-            (development_status_start_point - development_status_str_len) :
-        ]
+        development_status_start_point = re.search(r"Development Status :: [\d] \- ", development_status).span(0)[1]
+        status = development_status[(development_status_start_point - development_status_str_len) :]
     except IndexError:
         pass
     if development_status:
@@ -76,31 +67,20 @@ def bug_responding(bugs_url, auth):
         for item in timeline:
             if item.get("event") == "commented":
                 bug_comment = item.get("body")
-                bug_comment_date = datetime.strptime(
-                    item.get("created_at"), "%Y-%m-%dT%H:%M:%SZ"
-                )
-                bug_comment_list.append(
-                    BugComments(bug_comment, bug_comment_date, bug_id)
-                )
-    bug_comment_list = sorted(
-        bug_comment_list, key=attrgetter("create_date"), reverse=True
-    )
+                bug_comment_date = datetime.strptime(item.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+                bug_comment_list.append(BugComments(bug_comment, bug_comment_date, bug_id))
+    bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
     if bug_comment_list:
-        bug_turn_around_time_reply_days = (
-            bug_comment_list[0].create_date - bug_create_date
-        ).days
-        days_since_last_bug_comment = (
-            datetime.today() - bug_comment_list[0].create_date
-        ).days
+        bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
+        days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
         # TODO: add logic to better colorize the message
-        message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
+        message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report \
+            {bug_comment_list[0].bug_id}"
         message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
         message = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
         return message
     else:
-        return (
-            "\t[bold green]There have been no bugs reported that are still open.[bold]"
-        )
+        return "\t[bold green]There have been no bugs reported that are still open.[bold]"
 
 
 def language_check(pypi_url):
@@ -110,14 +90,8 @@ def language_check(pypi_url):
     print("1. Is it described as 'production ready'?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
-    languages = [
-        s.replace("Programming Language :: Python :: ", "Python ")
-        for s in classifiers
-        if "Programming Language" in s
-    ]
-    message = (
-        "\t[bold blue]The project supports the following programming languages[bold]\n"
-    )
+    languages = [s.replace("Programming Language :: Python :: ", "Python ") for s in classifiers if "Programming Language" in s]
+    message = "\t[bold blue]The project supports the following programming languages[bold]\n"
     for language in languages:
         message += f"\t\t- {language}\n"
     return message
@@ -130,15 +104,9 @@ def framework_check(pypi_url):
     print("1. Is it described as 'production ready'?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
-    frameworks = [
-        s.replace("Framework Django", "Framework").replace(" ::", "")
-        for s in classifiers
-        if "Framework" in s
-    ]
+    frameworks = [s.replace("Framework Django", "Framework").replace(" ::", "") for s in classifiers if "Framework" in s]
     if frameworks:
-        framework = [s for s in classifiers if "Framework" in s][-1].replace(
-            " :: ", " "
-        )
+        framework = [s for s in classifiers if "Framework" in s][-1].replace(" :: ", " ")
         message = f"\t[bold blue]The project supports the following framework as it's latest[bold] {framework}"
     else:
         message = "\t[bold blue]This project has no associated frameworks"
@@ -192,7 +160,8 @@ def commit_in_last_year(commits_url, auth):
     if days_since_last_commit > 365:
         message = f"\t[red]No. The last commit was {days_since_last_commit} days ago"
     else:
-        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} which was {days_since_last_commit} days ago"
+        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} which was \
+            {days_since_last_commit} days ago"
 
     return message
 
@@ -206,6 +175,7 @@ def release_in_last_year(releases_api_url, auth):
     if days_since_last_release > 365:
         message = f"\t[red]No. The last commit was {days_since_last_release} days ago"
     else:
-        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_release_date, '%m-%d-%Y')} which was {days_since_last_release} days ago"
+        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_release_date, '%m-%d-%Y')} which was \
+            {days_since_last_release} days ago"
 
     return message

@@ -6,12 +6,8 @@ random_days_good = -randrange(25, 250)
 random_days_bad = -randrange(400, 600)
 
 
-GOOD_DATE = datetime.strftime(
-    today + timedelta(days=random_days_good), "%Y-%m-%dT%H:%M:%SZ"
-)
-BAD_DATE = datetime.strftime(
-    today + timedelta(days=random_days_bad), "%Y-%m-%dT%H:%M:%SZ"
-)
+GOOD_DATE = datetime.strftime(today + timedelta(days=random_days_good), "%Y-%m-%dT%H:%M:%SZ")
+BAD_DATE = datetime.strftime(today + timedelta(days=random_days_bad), "%Y-%m-%dT%H:%M:%SZ")
 
 
 class MockResponseCIPassing:
@@ -96,13 +92,7 @@ class MockResponseProductionReadyNo:
 class MockResponseDocumentationYes:
     @staticmethod
     def json():
-        return {
-            "info": {
-                "project_urls": {
-                    "Documentation": "https://github.com/simonw/db-to-sqlite/blob/main/README.md"
-                }
-            }
-        }
+        return {"info": {"project_urls": {"Documentation": "https://github.com/simonw/db-to-sqlite/blob/main/README.md"}}}
 
 
 class MockResponseDocumentationNo:

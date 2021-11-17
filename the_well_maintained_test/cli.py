@@ -1,12 +1,7 @@
-import json
-from collections import namedtuple
-from datetime import datetime, time
-from operator import attrgetter
 from urllib.parse import urlparse
 
 import click
 import requests
-from click.types import Choice
 from rich import print
 
 from .utils import (
@@ -29,9 +24,10 @@ from .utils import (
 @click.version_option()
 @click.argument("url")
 @click.option("--username", help="What GitHub Username you use")
-def cli(url, username): # pragma: no cover
+def cli(url, username):  # pragma: no cover
     """
-    Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+    Programatically tries to answer the 12 questions from \
+        Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
 
     URL is a url to a github repository you'd like to check, for example:
 
@@ -49,16 +45,13 @@ def cli(url, username): # pragma: no cover
     author = parse_object.path.split("/")[-2]
     package = parse_object.path.split("/")[-1]
     api_url = f"https://api.github.com/repos/{author}/{package}"
-    changelog_url = (
-        f"https://raw.githubusercontent.com/{author}/{package}/main/CHANGELOG.md"
-    )
+    changelog_url = f"https://raw.githubusercontent.com/{author}/{package}/main/CHANGELOG.md"
     releases_url = f"https://www.github.com/{author}/{package}/releases"
     releases_api_url = f"https://api.github.com/repos/{author}/{package}/releases"
     commits_url = f"https://api.github.com/repos/{author}/{package}/commits"
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
     bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
-    language_url = f"https://api.github.com/repos/{author}/{package}/languages"
     changelog = requests.get(changelog_url, auth=auth)
     release = requests.get(releases_url, auth=auth)
     pypi_url = f"https://pypi.org/pypi/{package}/json"
