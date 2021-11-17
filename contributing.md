@@ -18,4 +18,9 @@ To run the tests:
 
 ## Code style
 
-This library uses [Black](https://github.com/psf/black) for code formatting. The correct version of Black will be installed by `pip install -e '.[test]'` - you can run `black .` in the root directory to apply those formatting rules.
+This library uses 
+
+* [Black](https://github.com/psf/black) and [Flake8](https://github.com/PyCQA/flake8) for code formatting. 
+* [isort](https://github.com/PyCQA/isort) to sort packages
+
+The correct version of these libraries will be installed by `pip install -e '.[test]'` - you can run `pre-commit run --all-files` in the root directory to apply those formatting rules.
