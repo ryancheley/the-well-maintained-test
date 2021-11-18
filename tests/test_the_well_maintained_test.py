@@ -96,14 +96,14 @@ def test_bug_response_yes():
     auth = ()
     BugComments = namedtuple("BugComments", ["text", "create_date", "bug_id"])
     today = date.today()
-    bug_turn_around_time_reply_days = (today - date(2019, 7, 11)).days
+    bug_turn_around_time_reply_days = (today - date(2019, 7, 12)).days
     bug_comment_list = [BugComments("Text", "", 37)]
 
     days_since_last_bug_comment = (today - date(2021, 11, 6)).days
     expected = bug_responding(url, auth)
-    message1 = f"The maintainer took \
-        {bug_turn_around_time_reply_days} days to respond to the bug report \
-        {bug_comment_list[0].bug_id}"
+    message1 = (
+        f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
+    )
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
     actual = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
     assert expected == actual
@@ -378,8 +378,7 @@ def test_language_check(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = language_check(url)
-    expected = "\t[bold blue]The project supports the following \
-        programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
+    expected = "\t[bold blue]The project supports the following programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
     assert actual == expected
 
 
