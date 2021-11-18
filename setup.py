@@ -25,6 +25,7 @@ setup(
         "Issues": "https://github.com/ryancheley/the-well-maintained-test/issues",
         "CI": "https://github.com/ryancheley/the-well-maintained-test/actions",
         "Changelog": "https://github.com/ryancheley/the-well-maintained-test/releases",
+        "Documentation": "https://github.com/ryancheley/the-well-maintained-test/blob/main/README.md",
     },
     license="Apache License, Version 2.0",
     version=VERSION,
@@ -36,4 +37,13 @@ setup(
     install_requires=["click", "requests", "rich"],
     extras_require={"test": ["pytest", "black", "isort"]},
     python_requires=">=3.7",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Topic :: Utilities",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
 )
