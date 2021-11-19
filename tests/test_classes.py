@@ -71,6 +71,47 @@ class MockResponseCISetUpNo:
         return {"total_count": 0}
 
 
+class MockResponseBugsYes:
+    @staticmethod
+    def json():
+        return [
+            {
+                "id": 1,
+                "node_id": ";lkjsdf",
+                "url": "https://fakeurl",
+                "event": "labeled",
+                "commit_id": "null",
+                "commit_url": "null",
+                "created_at": "2019-07-14T06:07:06Z",
+                "label": {"name": "bug", "color": "d73a4a"},
+                "performed_via_github_app": "null",
+            },
+            {
+                "id": 2,
+                "node_id": "asdfsadf=",
+                "url": "https://fakeurl",
+                "event": "labeled",
+                "commit_id": "null",
+                "commit_url": "null",
+                "created_at": "2019-07-14T06:07:06Z",
+                "label": {"name": "help wanted", "color": "008672"},
+                "performed_via_github_app": "null",
+            },
+            {
+                "url": "https://fakeurl",
+                "html_url": "https://fakeurl",
+                "issue_url": "https://fakeurl",
+                "id": 3,
+                "node_id": "asdfs",
+                "created_at": "2019-07-14T06:07:07Z",
+                "updated_at": "2021-06-12T14:09:05Z",
+                "author_association": "OWNER",
+                "body": "This is the body.",
+                "event": "commented",
+            },
+        ]
+
+
 class MockResponseBugsNo:
     @staticmethod
     def json():
@@ -92,7 +133,7 @@ class MockResponseProductionReadyNo:
 class MockResponseDocumentationYes:
     @staticmethod
     def json():
-        return {"info": {"project_urls": {"Documentation": "https://github.com/simonw/db-to-sqlite/blob/main/README.md"}}}
+        return {"info": {"project_urls": {"Documentation": "https://fakeurl/blob/main/README.md"}}}
 
 
 class MockResponseDocumentationNo:
@@ -151,3 +192,15 @@ class MockResponseFrameworkCheck:
                 "version": "0.5",
             }
         }
+
+
+class MockResponseCommentList:
+    @staticmethod
+    def json():
+        return [
+            {
+                "created_at": "2019-07-14T06:07:07Z",
+                "body": "This is the body.",
+                "event": "commented",
+            }
+        ]

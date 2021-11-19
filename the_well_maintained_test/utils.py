@@ -57,25 +57,18 @@ def change_log_check(changelog, release):
 
 def bug_responding(bugs_url, auth):
     print("4. Is someone responding to bug reports?")
-    BugComments = namedtuple("BugComments", ["text", "create_date", "bug_id"])
     r = requests.get(bugs_url, auth=auth).json()
     bug_comment_list = []
     for i in r:
         bug_create_date = datetime.strptime(i.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-        bug_id = i.get("number")
-        timeline = requests.get(i.get("timeline_url"), auth=auth).json()
-        for item in timeline:
-            if item.get("event") == "commented":
-                bug_comment = item.get("body")
-                bug_comment_date = datetime.strptime(item.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-                bug_comment_list.append(BugComments(bug_comment, bug_comment_date, bug_id))
+        bug_comment_list = _get_bug_comment_list(i.get("timeline_url"), auth)
     bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
     if bug_comment_list:
         bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
         days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
         # TODO: add logic to better colorize the message
         message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
-        message1 += f"days to respond to the bug report {bug_comment_list[0].bug_id}"
+        message1 += "days to respond to the bug report"
         message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
         message = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
         return message
@@ -83,11 +76,22 @@ def bug_responding(bugs_url, auth):
         return "\t[bold green]There have been no bugs reported that are still open.[bold]"
 
 
+def _get_bug_comment_list(url, auth):
+    BugComments = namedtuple("BugComments", ["text", "create_date"])
+    bug_comment_list = []
+    timeline = requests.get(url, auth=auth).json()[-1]
+    if timeline.get("event") == "commented":
+        bug_comment = timeline.get("body")
+        bug_comment_date = datetime.strptime(timeline.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+        bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
+    return bug_comment_list
+
+
 def language_check(pypi_url):
     """
     6. Are the tests running with the latest Language version?
     """
-    print("1. Is it described as 'production ready'?")
+    print("6. Are the tests running with the latest Language version?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
     languages = [s.replace("Programming Language :: Python :: ", "Python ") for s in classifiers if "Programming Language" in s]
@@ -101,7 +105,7 @@ def framework_check(pypi_url):
     """
     7. Are the tests running with the latest Integration version?
     """
-    print("1. Is it described as 'production ready'?")
+    print("7. Are the tests running with the latest Integration version?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
     frameworks = [s.replace("Framework Django", "Framework").replace(" ::", "") for s in classifiers if "Framework" in s]

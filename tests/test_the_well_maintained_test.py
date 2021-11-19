@@ -10,10 +10,12 @@ from tests.test_classes import (
     BAD_DATE,
     GOOD_DATE,
     MockResponseBugsNo,
+    MockResponseBugsYes,
     MockResponseCIFailing,
     MockResponseCIPassing,
     MockResponseCISetUpNo,
     MockResponseCISetUpYes,
+    MockResponseCommentList,
     MockResponseCommitsNo,
     MockResponseCommitsYes,
     MockResponseDocumentationNo,
@@ -28,6 +30,7 @@ from tests.test_classes import (
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.utils import (
+    _get_bug_comment_list,
     bug_responding,
     change_log_check,
     ci_passing,
@@ -88,25 +91,60 @@ def test_changelog(test_input, expected):
     assert test == expected
 
 
-def test_bug_response_yes():
+def test_bug_response_yes(monkeypatch):
     """
     4. Is someone responding to bug reports?
     """
-    url = "https://api.github.com/repos/simonw/db-to-sqlite/issues"
-    auth = ()
-    BugComments = namedtuple("BugComments", ["text", "create_date", "bug_id"])
-    today = date.today()
-    bug_turn_around_time_reply_days = (today - date(2019, 7, 12)).days
-    bug_comment_list = [BugComments("Text", "", 37)]
 
-    days_since_last_bug_comment = (today - date(2021, 11, 6)).days
+    def mock_get_bug_comment(url, auth):
+        BugComments = namedtuple("BugComments", ["text", "create_date"])
+        return [BugComments(text="Test", create_date=datetime.today())]
+
+    def mock_get(*args, **kwargs):
+        return MockResponseBugsYes()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl/17/timeline"
+
+    auth = ()
+    monkeypatch.setattr("the_well_maintained_test.utils._get_bug_comment_list", mock_get_bug_comment)
+
+    today = date.today()
+
+    bug_comment_list = _get_bug_comment_list(url, auth)
+
+    bug_turn_around_time_reply_days = (today - bug_comment_list[0].create_date.date()).days
+
+    days_since_last_bug_comment = 0
     expected = bug_responding(url, auth)
-    message1 = (
-        f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report {bug_comment_list[0].bug_id}"
-    )
+    message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
     actual = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
     assert expected == actual
+
+
+def test__get_bug_comment_list(monkeypatch):
+    """A helper function to get the details of the comments for bugs
+
+    Args:
+        monkeypatch ([type]): [description]
+    """
+    BugComments = namedtuple("BugComments", ["text", "create_date"])
+    auth = ()
+
+    def mock_get(*args, **kwargs):
+        return MockResponseCommentList()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl/17/timeline"
+    actual = _get_bug_comment_list(url, auth)
+    expected = [
+        BugComments(
+            text="This is the body.",
+            create_date=datetime(2019, 7, 14, 6, 7, 7),
+        )
+    ]
+    assert actual == expected
 
 
 def test_bug_response_no(monkeypatch):
@@ -346,7 +384,7 @@ def test_document_exists_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = documentation_exists(url)
-    expected = "\t[bold green]Documentation can be found at https://github.com/simonw/db-to-sqlite/blob/main/README.md[bold]"
+    expected = "\t[bold green]Documentation can be found at https://fakeurl/blob/main/README.md[bold]"
     assert actual == expected
 
 
