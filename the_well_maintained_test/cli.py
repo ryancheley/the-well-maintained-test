@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlparse
 
 import click
@@ -19,12 +20,20 @@ from .utils import (
     yes_no,
 )
 
+try:  # pragma: no cover
+    with open("auth.json") as f:
+        data = json.load(f)
+    headers = {
+        "Authorization": f'token {data["github_personal_token"]}',
+    }
+except FileNotFoundError:  # pragma: no cover
+    headers = {}
+
 
 @click.command()
 @click.version_option()
 @click.argument("url")
-@click.option("--username", help="What GitHub Username you use")
-def cli(url, username):  # pragma: no cover
+def cli(url):  # pragma: no cover
     """
     Programatically tries to answer the 12 questions from \
         Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
@@ -34,10 +43,7 @@ def cli(url, username):  # pragma: no cover
         the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
 
     """
-    if username:
-        auth = (username, "")
-    else:
-        auth = ()
+
     if url[-1] == "/":
         url = url.strip("/")
 
@@ -52,8 +58,8 @@ def cli(url, username):  # pragma: no cover
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
     bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
-    changelog = requests.get(changelog_url, auth=auth)
-    release = requests.get(releases_url, auth=auth)
+    changelog = requests.get(changelog_url, headers=headers)
+    release = requests.get(releases_url, headers=headers)
     pypi_url = f"https://pypi.org/pypi/{package}/json"
 
     print(production_ready_check(pypi_url))
@@ -62,7 +68,7 @@ def cli(url, username):  # pragma: no cover
 
     print(change_log_check(changelog, release))
 
-    print(bug_responding(bugs_url, auth))
+    print(bug_responding(bugs_url, headers))
 
     print(yes_no("5. Are there sufficient tests?"))
 
@@ -70,12 +76,12 @@ def cli(url, username):  # pragma: no cover
 
     print(framework_check(pypi_url))
 
-    print(ci_setup(workflows_url, auth))
+    print(ci_setup(workflows_url, headers))
 
-    print(ci_passing(ci_status_url, auth))
+    print(ci_passing(ci_status_url, headers))
 
-    print(well_used(api_url, auth))
+    print(well_used(api_url, headers))
 
-    print(commit_in_last_year(commits_url, auth))
+    print(commit_in_last_year(commits_url, headers))
 
-    print(release_in_last_year(releases_api_url, auth))
+    print(release_in_last_year(releases_api_url, headers))

@@ -96,8 +96,9 @@ def test_bug_response_yes(monkeypatch):
     """
     4. Is someone responding to bug reports?
     """
+    headers = {}
 
-    def mock_get_bug_comment(url, auth):
+    def mock_get_bug_comment(url, headers=headers):
         BugComments = namedtuple("BugComments", ["text", "create_date"])
         return [BugComments(text="Test", create_date=datetime.today())]
 
@@ -107,17 +108,17 @@ def test_bug_response_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl/17/timeline"
 
-    auth = ()
+    headers = {}
     monkeypatch.setattr("the_well_maintained_test.utils._get_bug_comment_list", mock_get_bug_comment)
 
     today = date.today()
 
-    bug_comment_list = _get_bug_comment_list(url, auth)
+    bug_comment_list = _get_bug_comment_list(url, headers=headers)
 
     bug_turn_around_time_reply_days = (today - bug_comment_list[0].create_date.date()).days
 
     days_since_last_bug_comment = 0
-    expected = bug_responding(url, auth)
+    expected = bug_responding(url, headers=headers)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
     actual = f"\t[bold red]{message1}\n\t{message2}[bold]"
@@ -131,14 +132,14 @@ def test__get_bug_comment_list(monkeypatch):
         monkeypatch ([type]): [description]
     """
     BugComments = namedtuple("BugComments", ["text", "create_date"])
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCommentList()
 
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl/17/timeline"
-    actual = _get_bug_comment_list(url, auth)
+    actual = _get_bug_comment_list(url, headers=headers)
     expected = [
         BugComments(
             text="This is the body.",
@@ -152,7 +153,7 @@ def test_bug_response_no(monkeypatch):
     """
     4. Is someone responding to bug reports?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseBugsNo()
@@ -160,7 +161,7 @@ def test_bug_response_no(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = bug_responding(url, auth)
+    actual = bug_responding(url, headers=headers)
     expected = "\t[bold green]There have been no bugs reported that are still open.[bold]"
     assert actual == expected
 
@@ -169,7 +170,7 @@ def test_bug_response_yes_no_response(monkeypatch):
     """
     4. Is someone responding to bug reports?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseBugsWithNoResponse()
@@ -177,7 +178,7 @@ def test_bug_response_yes_no_response(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = bug_responding(url, auth)
+    actual = bug_responding(url, headers=headers)
     expected = "\t[bold red]There are 1 bugs with no comments[bold]"
     assert actual == expected
 
@@ -186,7 +187,7 @@ def test_ci_setup_yes(monkeypatch):
     """
     8. Is there a Continuous Integration (CI) configuration?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCISetUpYes()
@@ -194,7 +195,7 @@ def test_ci_setup_yes(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = ci_setup(url, auth)
+    actual = ci_setup(url, headers=headers)
     expected = "[bold green]\tThere are 1 workflows[bold]\n[bold blue]\t - Test\n[bold]"
     assert actual == expected
 
@@ -203,7 +204,7 @@ def test_ci_setup_no(monkeypatch):
     """
     8. Is there a Continuous Integration (CI) configuration?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCISetUpNo()
@@ -211,7 +212,7 @@ def test_ci_setup_no(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = ci_setup(url, auth)
+    actual = ci_setup(url, headers=headers)
     expected = "[bold red]There is no CI set up![bold]"
     assert actual == expected
 
@@ -220,7 +221,7 @@ def test_ci_passing_yes(monkeypatch):
     """
     9. Is the CI passing?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCIPassing()
@@ -228,7 +229,7 @@ def test_ci_passing_yes(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = ci_passing(url, auth)
+    actual = ci_passing(url, headers=headers)
     expected = "\t[green]Yes"
     assert actual == expected
 
@@ -237,7 +238,7 @@ def test_ci_passing_no(monkeypatch):
     """
     9. Is the CI passing?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCIFailing()
@@ -245,7 +246,7 @@ def test_ci_passing_no(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = ci_passing(url, auth)
+    actual = ci_passing(url, headers=headers)
     expected = "\t[red]No"
     assert actual == expected
 
@@ -254,7 +255,7 @@ def test_well_used(monkeypatch):
     """
     10. Does it seem relatively well used?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseWellUsed()
@@ -262,7 +263,7 @@ def test_well_used(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = well_used(url, auth)
+    actual = well_used(url, headers=headers)
     message = "\tThe project has the following statistics:\n"
     message += "\t- Watchers: 5\n"
     message += "\t- Forks: 6\n"
@@ -277,7 +278,7 @@ def test_commit_in_last_year_yes(monkeypatch):
     """
     11. Has there been a commit in the last year?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCommitsYes()
@@ -289,7 +290,7 @@ def test_commit_in_last_year_yes(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = commit_in_last_year(url, auth)
+    actual = commit_in_last_year(url, headers=headers)
     expected = f"\t[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
     assert actual == expected
 
@@ -298,7 +299,7 @@ def test_commit_in_last_year_no(monkeypatch):
     """
     11. Has there been a commit in the last year?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseCommitsNo()
@@ -310,7 +311,7 @@ def test_commit_in_last_year_no(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = commit_in_last_year(url, auth)
+    actual = commit_in_last_year(url, headers=headers)
     expected = f"\t[red]No. The last commit was {days} days ago"
     assert actual == expected
 
@@ -319,7 +320,7 @@ def test_release_in_last_year_yes(monkeypatch):
     """
     12. Has there been a release in the last year?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseReleasesYes()
@@ -332,7 +333,7 @@ def test_release_in_last_year_yes(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = release_in_last_year(url, auth)
+    actual = release_in_last_year(url, headers=headers)
     expected = f"\t[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
     assert actual == expected
 
@@ -341,7 +342,7 @@ def test_release_in_last_year_no(monkeypatch):
     """
     12. Has there been a release in the last year?
     """
-    auth = ()
+    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseReleasesNo()
@@ -353,7 +354,7 @@ def test_release_in_last_year_no(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = release_in_last_year(url, auth)
+    actual = release_in_last_year(url, headers=headers)
     expected = f"\t[red]No. The last commit was {days} days ago"
     assert actual == expected
 

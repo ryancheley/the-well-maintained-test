@@ -55,9 +55,9 @@ def change_log_check(changelog, release):
         return "[bold red]\tNo[bold]"
 
 
-def bug_responding(bugs_url, auth):
+def bug_responding(bugs_url, headers):
     print("4. Is someone responding to bug reports?")
-    r = requests.get(bugs_url, auth=auth).json()
+    r = requests.get(bugs_url, headers=headers).json()
     open_bug_count = len(r)
     bug_comment_list = []
     if open_bug_count == 0:
@@ -65,7 +65,7 @@ def bug_responding(bugs_url, auth):
     else:
         for i in r:
             bug_create_date = datetime.strptime(i.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-            bug_comment_list = _get_bug_comment_list(i.get("timeline_url"), auth)
+            bug_comment_list = _get_bug_comment_list(i.get("timeline_url"), headers=headers)
         bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
         if bug_comment_list:
             bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
@@ -80,10 +80,10 @@ def bug_responding(bugs_url, auth):
     return message
 
 
-def _get_bug_comment_list(url, auth):
+def _get_bug_comment_list(url, headers):
     BugComments = namedtuple("BugComments", ["text", "create_date"])
     bug_comment_list = []
-    timeline = requests.get(url, auth=auth).json()[-1]
+    timeline = requests.get(url, headers=headers).json()[-1]
     if timeline.get("event") == "commented":
         bug_comment = timeline.get("body")
         bug_comment_date = datetime.strptime(timeline.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
@@ -121,9 +121,9 @@ def framework_check(pypi_url):
     return message
 
 
-def ci_setup(workflows_url, auth):
+def ci_setup(workflows_url, headers):
     print("8. Is there a Continuous Integration (CI) configuration?")
-    r = requests.get(workflows_url, auth=auth).json()
+    r = requests.get(workflows_url, headers=headers).json()
     if r.get("total_count") > 0:
         message = f"[bold green]\tThere are {r.get('total_count')} workflows[bold]\n"
         for i in r.get("workflows"):
@@ -133,9 +133,9 @@ def ci_setup(workflows_url, auth):
         return "[bold red]There is no CI set up![bold]"
 
 
-def ci_passing(ci_status_url, auth):
+def ci_passing(ci_status_url, headers):
     print("[bold]9. Is the CI passing?")
-    r = requests.get(ci_status_url, auth=auth).json()
+    r = requests.get(ci_status_url, headers=headers).json()
     conclusion = r.get("workflow_runs")[0].get("conclusion")
     if conclusion == "success":
         return "\t[green]Yes"
@@ -143,10 +143,10 @@ def ci_passing(ci_status_url, auth):
         return "\t[red]No"
 
 
-def well_used(api_url, auth):
+def well_used(api_url, headers):
     print("[bold]10. Does it seem relatively well used?")
 
-    r = requests.get(api_url, auth=auth).json()
+    r = requests.get(api_url, headers=headers).json()
     watchers = r.get("watchers")
     network_count = r.get("network_count")
     open_issues = r.get("open_issues")
@@ -159,9 +159,9 @@ def well_used(api_url, auth):
     return message
 
 
-def commit_in_last_year(commits_url, auth):
+def commit_in_last_year(commits_url, headers):
     print("[bold]11. Has there been a commit in the last year?")
-    r = requests.get(commits_url, auth=auth).json()
+    r = requests.get(commits_url, headers=headers).json()
     last_commit_date = r[0].get("commit").get("author").get("date")
     last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
     days_since_last_commit = (datetime.utcnow() - last_commit_date).days
@@ -174,9 +174,9 @@ def commit_in_last_year(commits_url, auth):
     return message
 
 
-def release_in_last_year(releases_api_url, auth):
+def release_in_last_year(releases_api_url, headers):
     print("[bold]12. Has there been a release in the last year?")
-    r = requests.get(releases_api_url, auth=auth).json()
+    r = requests.get(releases_api_url, headers=headers).json()
     last_release_date = r[0].get("created_at")
     last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%SZ")
     days_since_last_release = (datetime.utcnow() - last_release_date).days
