@@ -82,7 +82,7 @@ class MockResponseBugsYes:
                 "event": "labeled",
                 "commit_id": "null",
                 "commit_url": "null",
-                "created_at": "2019-07-14T06:07:06Z",
+                "created_at": "2019-07-14T00:00:00Z",
                 "label": {"name": "bug", "color": "d73a4a"},
                 "performed_via_github_app": "null",
             },
@@ -93,7 +93,7 @@ class MockResponseBugsYes:
                 "event": "labeled",
                 "commit_id": "null",
                 "commit_url": "null",
-                "created_at": "2019-07-14T06:07:06Z",
+                "created_at": "2019-07-14T00:00:00Z",
                 "label": {"name": "help wanted", "color": "008672"},
                 "performed_via_github_app": "null",
             },
@@ -103,8 +103,8 @@ class MockResponseBugsYes:
                 "issue_url": "https://fakeurl",
                 "id": 3,
                 "node_id": "asdfs",
-                "created_at": "2019-07-14T06:07:07Z",
-                "updated_at": "2021-06-12T14:09:05Z",
+                "created_at": "2019-07-14T00:00:00Z",
+                "updated_at": "2021-06-12T00:00:00Z",
                 "author_association": "OWNER",
                 "body": "This is the body.",
                 "event": "commented",
@@ -199,7 +199,7 @@ class MockResponseCommentList:
     def json():
         return [
             {
-                "created_at": "2019-07-14T06:07:07Z",
+                "created_at": "2019-07-14T00:00:00Z",
                 "body": "This is the body.",
                 "event": "commented",
             }

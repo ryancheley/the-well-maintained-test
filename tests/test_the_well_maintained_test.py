@@ -141,7 +141,7 @@ def test__get_bug_comment_list(monkeypatch):
     expected = [
         BugComments(
             text="This is the body.",
-            create_date=datetime(2019, 7, 14, 6, 7, 7),
+            create_date=datetime(2019, 7, 14, 0, 0, 0),
         )
     ]
     assert actual == expected
