@@ -69,7 +69,7 @@ def bug_responding(bugs_url, auth):
         bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
         if bug_comment_list:
             bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
-            days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
+            days_since_last_bug_comment = (datetime.utcnow() - bug_comment_list[0].create_date).days
             # TODO: add logic to better colorize the message
             message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
             message1 += "days to respond to the bug report"
@@ -164,7 +164,7 @@ def commit_in_last_year(commits_url, auth):
     r = requests.get(commits_url, auth=auth).json()
     last_commit_date = r[0].get("commit").get("author").get("date")
     last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
-    days_since_last_commit = (datetime.today() - last_commit_date).days
+    days_since_last_commit = (datetime.utcnow() - last_commit_date).days
     if days_since_last_commit > 365:
         message = f"\t[red]No. The last commit was {days_since_last_commit} days ago"
     else:
@@ -179,7 +179,7 @@ def release_in_last_year(releases_api_url, auth):
     r = requests.get(releases_api_url, auth=auth).json()
     last_release_date = r[0].get("created_at")
     last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%SZ")
-    days_since_last_release = (datetime.today() - last_release_date).days
+    days_since_last_release = (datetime.utcnow() - last_release_date).days
     if days_since_last_release > 365:
         message = f"\t[red]No. The last commit was {days_since_last_release} days ago"
     else:
