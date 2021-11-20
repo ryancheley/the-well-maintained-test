@@ -58,22 +58,26 @@ def change_log_check(changelog, release):
 def bug_responding(bugs_url, auth):
     print("4. Is someone responding to bug reports?")
     r = requests.get(bugs_url, auth=auth).json()
+    open_bug_count = len(r)
     bug_comment_list = []
-    for i in r:
-        bug_create_date = datetime.strptime(i.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-        bug_comment_list = _get_bug_comment_list(i.get("timeline_url"), auth)
-    bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
-    if bug_comment_list:
-        bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
-        days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
-        # TODO: add logic to better colorize the message
-        message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
-        message1 += "days to respond to the bug report"
-        message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-        message = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
-        return message
+    if open_bug_count == 0:
+        message = "\t[bold green]There have been no bugs reported that are still open.[bold]"
     else:
-        return "\t[bold green]There have been no bugs reported that are still open.[bold]"
+        for i in r:
+            bug_create_date = datetime.strptime(i.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+            bug_comment_list = _get_bug_comment_list(i.get("timeline_url"), auth)
+        bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
+        if bug_comment_list:
+            bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
+            days_since_last_bug_comment = (datetime.today() - bug_comment_list[0].create_date).days
+            # TODO: add logic to better colorize the message
+            message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
+            message1 += "days to respond to the bug report"
+            message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
+            message = f"\t[bold red]{message1}\n\t{message2}[bold]"
+        else:
+            message = f"\t[bold red]There are {open_bug_count} bugs with no comments[bold]"
+    return message
 
 
 def _get_bug_comment_list(url, auth):

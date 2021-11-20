@@ -115,7 +115,25 @@ class MockResponseBugsYes:
 class MockResponseBugsNo:
     @staticmethod
     def json():
-        return {}
+        return []
+
+
+class MockResponseBugsWithNoResponse:
+    @staticmethod
+    def json():
+        return [
+            {
+                "id": 1,
+                "node_id": ";lkjsdf",
+                "url": "https://fakeurl",
+                "event": "labeled",
+                "commit_id": "null",
+                "commit_url": "null",
+                "created_at": "2019-07-14T00:00:00Z",
+                "label": {"name": "bug", "color": "d73a4a"},
+                "performed_via_github_app": "null",
+            },
+        ]
 
 
 class MockResponseProductionReadyYes:

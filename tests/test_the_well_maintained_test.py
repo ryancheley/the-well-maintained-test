@@ -10,6 +10,7 @@ from tests.test_classes import (
     BAD_DATE,
     GOOD_DATE,
     MockResponseBugsNo,
+    MockResponseBugsWithNoResponse,
     MockResponseBugsYes,
     MockResponseCIFailing,
     MockResponseCIPassing,
@@ -119,7 +120,7 @@ def test_bug_response_yes(monkeypatch):
     expected = bug_responding(url, auth)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-    actual = f"""[bold red]\t{message1}\n\t{message2}[bold]"""
+    actual = f"\t[bold red]{message1}\n\t{message2}[bold]"
     assert expected == actual
 
 
@@ -161,6 +162,23 @@ def test_bug_response_no(monkeypatch):
     url = "https://fakeurl"
     actual = bug_responding(url, auth)
     expected = "\t[bold green]There have been no bugs reported that are still open.[bold]"
+    assert actual == expected
+
+
+def test_bug_response_yes_no_response(monkeypatch):
+    """
+    4. Is someone responding to bug reports?
+    """
+    auth = ()
+
+    def mock_get(*args, **kwargs):
+        return MockResponseBugsWithNoResponse()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = bug_responding(url, auth)
+    expected = "\t[bold red]There are 1 bugs with no comments[bold]"
     assert actual == expected
 
 
