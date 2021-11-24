@@ -53,7 +53,6 @@ def cli(url):  # pragma: no cover
     api_url = f"https://api.github.com/repos/{author}/{package}"
     changelog_url = f"https://raw.githubusercontent.com/{author}/{package}/main/CHANGELOG.md"
     releases_url = f"https://www.github.com/{author}/{package}/releases"
-    releases_api_url = f"https://api.github.com/repos/{author}/{package}/releases"
     commits_url = f"https://api.github.com/repos/{author}/{package}/commits"
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
@@ -85,4 +84,4 @@ def cli(url):  # pragma: no cover
 
     print(commit_in_last_year(commits_url, headers))
 
-    print(release_in_last_year(releases_api_url, headers))
+    print(release_in_last_year(pypi_url))

@@ -191,11 +191,13 @@ def commit_in_last_year(commits_url, headers):
     return message
 
 
-def release_in_last_year(releases_api_url, headers):
+def release_in_last_year(pypi_api_url):
     print("[bold]12. Has there been a release in the last year?")
-    r = requests.get(releases_api_url, headers=headers).json()
-    last_release_date = r[0].get("created_at")
-    last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%SZ")
+    r = requests.get(pypi_api_url).json()
+    releases = list(r.get("releases"))
+    most_recent_release = [s for s in releases if re.search(r"\d{1,2}\.\d{1,9}\.\d{1,9}", s)][-1]
+    last_release_date = r.get("releases").get(most_recent_release)[0].get("upload_time")
+    last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%S")
     days_since_last_release = (datetime.utcnow() - last_release_date).days
     if days_since_last_release > 365:
         message = f"\t[red]No. The last commit was {days_since_last_release} days ago"

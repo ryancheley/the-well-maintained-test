@@ -6,8 +6,10 @@ random_days_good = -randrange(25, 250)
 random_days_bad = -randrange(400, 600)
 
 
-GOOD_DATE = datetime.strftime(today + timedelta(days=random_days_good), "%Y-%m-%dT%H:%M:%SZ")
-BAD_DATE = datetime.strftime(today + timedelta(days=random_days_bad), "%Y-%m-%dT%H:%M:%SZ")
+GOOD_DATE = datetime.strftime(today + timedelta(days=random_days_good), "%Y-%m-%dT%H:%M:%S")
+GOOD_DATE_Z = datetime.strftime(today + timedelta(days=random_days_good), "%Y-%m-%dT%H:%M:%SZ")
+BAD_DATE = datetime.strftime(today + timedelta(days=random_days_bad), "%Y-%m-%dT%H:%M:%S")
+BAD_DATE_Z = datetime.strftime(today + timedelta(days=random_days_bad), "%Y-%m-%dT%H:%M:%SZ")
 
 
 class MockResponseCIPassing:
@@ -38,25 +40,30 @@ class MockResponseWellUsed:
 class MockResponseCommitsYes:
     @staticmethod
     def json():
-        return [{"commit": {"author": {"date": GOOD_DATE}}}]
+        return [{"commit": {"author": {"date": GOOD_DATE_Z}}}]
 
 
 class MockResponseCommitsNo:
     @staticmethod
     def json():
-        return [{"commit": {"author": {"date": BAD_DATE}}}]
+        return [{"commit": {"author": {"date": BAD_DATE_Z}}}]
 
 
 class MockResponseReleasesYes:
     @staticmethod
     def json():
-        return [{"created_at": GOOD_DATE}]
+        return {
+            "releases": {
+                "1.1.1": [{"upload_time": GOOD_DATE}],
+                "1.1.1a": [{"upload_time": GOOD_DATE}],
+            }
+        }
 
 
 class MockResponseReleasesNo:
     @staticmethod
     def json():
-        return [{"created_at": BAD_DATE}]
+        return {"releases": {"1.1.1": [{"upload_time": BAD_DATE}]}}
 
 
 class MockResponseCISetUpYes:

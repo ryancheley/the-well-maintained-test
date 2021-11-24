@@ -8,7 +8,9 @@ from click.testing import CliRunner
 
 from tests.test_classes import (
     BAD_DATE,
+    BAD_DATE_Z,
     GOOD_DATE,
+    GOOD_DATE_Z,
     MockGitHubFileCheckAPIWithOutTestFiles,
     MockGitHubFileCheckAPIWithTestFiles,
     MockResponseBugsNo,
@@ -287,7 +289,7 @@ def test_commit_in_last_year_yes(monkeypatch):
         return MockResponseCommitsYes()
 
     today = datetime.now()
-    test_date = datetime.strptime(GOOD_DATE, "%Y-%m-%dT%H:%M:%SZ")
+    test_date = datetime.strptime(GOOD_DATE_Z, "%Y-%m-%dT%H:%M:%SZ")
     days = (today - test_date).days
 
     # apply the monkeypatch for requests.get to mock_get
@@ -308,7 +310,7 @@ def test_commit_in_last_year_no(monkeypatch):
         return MockResponseCommitsNo()
 
     today = datetime.now()
-    test_date = datetime.strptime(BAD_DATE, "%Y-%m-%dT%H:%M:%SZ")
+    test_date = datetime.strptime(BAD_DATE_Z, "%Y-%m-%dT%H:%M:%SZ")
     days = (today - test_date).days
 
     # apply the monkeypatch for requests.get to mock_get
@@ -323,20 +325,19 @@ def test_release_in_last_year_yes(monkeypatch):
     """
     12. Has there been a release in the last year?
     """
-    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseReleasesYes()
 
     today = datetime.now()
-    test_date = datetime.strptime(GOOD_DATE, "%Y-%m-%dT%H:%M:%SZ")
+    test_date = datetime.strptime(GOOD_DATE, "%Y-%m-%dT%H:%M:%S")
 
     days = (today - test_date).days
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = release_in_last_year(url, headers=headers)
+    actual = release_in_last_year(url)
     expected = f"\t[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
     assert actual == expected
 
@@ -345,19 +346,18 @@ def test_release_in_last_year_no(monkeypatch):
     """
     12. Has there been a release in the last year?
     """
-    headers = {}
 
     def mock_get(*args, **kwargs):
         return MockResponseReleasesNo()
 
     today = datetime.now()
-    test_date = datetime.strptime(BAD_DATE, "%Y-%m-%dT%H:%M:%SZ")
+    test_date = datetime.strptime(BAD_DATE, "%Y-%m-%dT%H:%M:%S")
     days = (today - test_date).days
 
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = release_in_last_year(url, headers=headers)
+    actual = release_in_last_year(url)
     expected = f"\t[red]No. The last commit was {days} days ago"
     assert actual == expected
 
