@@ -9,6 +9,8 @@ from click.testing import CliRunner
 from tests.test_classes import (
     BAD_DATE,
     GOOD_DATE,
+    MockGitHubFileCheckAPIWithOutTestFiles,
+    MockGitHubFileCheckAPIWithTestFiles,
     MockResponseBugsNo,
     MockResponseBugsWithNoResponse,
     MockResponseBugsYes,
@@ -34,6 +36,7 @@ from the_well_maintained_test.utils import (
     _get_bug_comment_list,
     bug_responding,
     change_log_check,
+    check_tests,
     ci_passing,
     ci_setup,
     commit_in_last_year,
@@ -468,4 +471,38 @@ def test_framework_check_does_not_exist(monkeypatch):
     url = "https://fakeurl"
     actual = framework_check(url)
     expected = "\t[bold blue]This project has no associated frameworks"
+    assert actual == expected
+
+
+def test_check_tests_exist(monkeypatch):
+    """
+    5. Are there sufficient tests?
+    """
+    headers = {}
+
+    def mock_get(*args, **kwargs):
+        return MockGitHubFileCheckAPIWithTestFiles()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = check_tests(url, headers=headers)
+    expected = "\t[bold green]There are 1 tests:[bold]\n\t\t- tests/admin_changelist/test_date_hierarchy.py\n"
+    assert actual == expected
+
+
+def test_check_tests_do_not_exis(monkeypatch):
+    """
+    5. Are there sufficient tests?
+    """
+    headers = {}
+
+    def mock_get(*args, **kwargs):
+        return MockGitHubFileCheckAPIWithOutTestFiles()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = check_tests(url, headers=headers)
+    expected = "\t[bold red]There are 0 tests![bold]"
     assert actual == expected

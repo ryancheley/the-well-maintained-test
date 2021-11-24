@@ -222,3 +222,65 @@ class MockResponseCommentList:
                 "event": "commented",
             }
         ]
+
+
+class MockGitHubFileCheckAPIWithTestFiles:
+    @staticmethod
+    def json():
+        return {
+            "sha": "98352ddf3a1ccffe8d38ecb34e1a51ed58d29cf3",
+            "url": "https://api.github.com/repos/django/django/git/trees/98352ddf3a1ccffe8d38ecb34e1a51ed58d29cf3",
+            "tree": [
+                {
+                    "path": ".editorconfig",
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": "fa6c23c1fc276940d65520daedccc03d59b4b79c",
+                    "size": 807,
+                    "url": "https://api.github.com/repos/django/django/git/blobs/fa6c23c1fc276940d65520daedccc03d59b4b79c",
+                },
+                {
+                    "path": ".eslintignore",
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": "9c273ed532043fae2166ed38c281c510a841dccc",
+                    "size": 120,
+                    "url": "https://api.github.com/repos/django/django/git/blobs/9c273ed532043fae2166ed38c281c510a841dccc",
+                },
+                {
+                    "path": "tests/admin_changelist/test_date_hierarchy.py",
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": "a321650b32b0f3666d8470e9a69711756907f6ba",
+                    "size": 3483,
+                    "url": "https://api.github.com/repos/django/django/git/blobs/a321650b32b0f3666d8470e9a69711756907f6ba",
+                },
+            ],
+        }
+
+
+class MockGitHubFileCheckAPIWithOutTestFiles:
+    @staticmethod
+    def json():
+        return {
+            "sha": "98352ddf3a1ccffe8d38ecb34e1a51ed58d29cf3",
+            "url": "https://api.github.com/repos/django/django/git/trees/98352ddf3a1ccffe8d38ecb34e1a51ed58d29cf3",
+            "tree": [
+                {
+                    "path": ".editorconfig",
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": "fa6c23c1fc276940d65520daedccc03d59b4b79c",
+                    "size": 807,
+                    "url": "https://api.github.com/repos/django/django/git/blobs/fa6c23c1fc276940d65520daedccc03d59b4b79c",
+                },
+                {
+                    "path": ".eslintignore",
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": "9c273ed532043fae2166ed38c281c510a841dccc",
+                    "size": 120,
+                    "url": "https://api.github.com/repos/django/django/git/blobs/9c273ed532043fae2166ed38c281c510a841dccc",
+                },
+            ],
+        }

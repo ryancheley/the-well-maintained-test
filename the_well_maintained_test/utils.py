@@ -91,6 +91,23 @@ def _get_bug_comment_list(url, headers):
     return bug_comment_list
 
 
+def check_tests(tree_url, headers):
+    print("5. Are there sufficient tests?")
+    r = requests.get(tree_url, headers=headers).json()
+    test_list = []
+    for i in r.get("tree"):
+        if i.get("type") == "blob":
+            test_list.append(i.get("path"))
+    test_list = [s for s in test_list if re.search(r"test_(.*).py", s)]
+    if len(test_list) == 0:
+        message = "\t[bold red]There are 0 tests![bold]"
+    else:
+        message = f"\t[bold green]There are {len(test_list)} tests:[bold]\n"
+        for test in test_list:
+            message += f"\t\t- {test}\n"
+    return message
+
+
 def language_check(pypi_url):
     """
     6. Are the tests running with the latest Language version?

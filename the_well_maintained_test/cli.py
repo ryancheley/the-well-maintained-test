@@ -8,6 +8,7 @@ from rich import print
 from .utils import (
     bug_responding,
     change_log_check,
+    check_tests,
     ci_passing,
     ci_setup,
     commit_in_last_year,
@@ -17,7 +18,6 @@ from .utils import (
     production_ready_check,
     release_in_last_year,
     well_used,
-    yes_no,
 )
 
 try:  # pragma: no cover
@@ -61,6 +61,7 @@ def cli(url):  # pragma: no cover
     changelog = requests.get(changelog_url, headers=headers)
     release = requests.get(releases_url, headers=headers)
     pypi_url = f"https://pypi.org/pypi/{package}/json"
+    tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/main?recursive=1"
 
     print(production_ready_check(pypi_url))
 
@@ -70,7 +71,7 @@ def cli(url):  # pragma: no cover
 
     print(bug_responding(bugs_url, headers))
 
-    print(yes_no("5. Are there sufficient tests?"))
+    print(check_tests(tree_url, headers))
 
     print(language_check(pypi_url))
 
