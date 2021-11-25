@@ -17,13 +17,46 @@ Install this tool using `pip`:
 
     $ pip install the-well-maintained-test
 
+
+## Authentication
+The GitHub API will rate limit anonymous calls. You can authenticate yourself with a personal token (documentation on how to generate is [here](https://github.com/settings/tokens))
+
+Run this command and paste in your new token:
+
+    the-well-maintained-test auth
+
+This will create a file called auth.json in your current directory containing the required value. To save the file at a different path or filename, use the `--auth=myauth.json` option.
+
 ## Usage
 
-    Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+    Usage: the-well-maintained-test [OPTIONS] COMMAND [ARGS]...
+
+    Programatically tries to answer the 12 questions from         Adam Johnson's
+    blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/ URL is
+    a url to a github repository you'd like to check, for example:     the-well-
+    maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+
+    Options:
+    --version  Show the version and exit.
+    --help     Show this message and exit.
+
+    Commands:
+    auth       Save authentication credentials to a JSON file
+    questions  List of questions tested
+    url        url to a github repository you'd like to check
+
 
     URL is a url to a github repository you'd like to check, for example:
 
-        the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+        the-well-maintained-test url 'https://github.com/ryancheley/the-well-maintained-test'
+
+If you want to see what questions will be answered before running you you can pass 
+
+    the-well-maintained-test questions
+
+If you want to see a single question
+
+    the-well-maintained-test questions -q 3
 
 
 ## Development
