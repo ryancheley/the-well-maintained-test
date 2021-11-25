@@ -40,13 +40,13 @@ class MockResponseWellUsed:
 class MockResponseCommitsYes:
     @staticmethod
     def json():
-        return [{"commit": {"author": {"date": GOOD_DATE_Z}}}]
+        return {"commit": {"author": {"date": GOOD_DATE_Z}}}
 
 
 class MockResponseCommitsNo:
     @staticmethod
     def json():
-        return [{"commit": {"author": {"date": BAD_DATE_Z}}}]
+        return {"commit": {"author": {"date": BAD_DATE_Z}}}
 
 
 class MockResponseReleasesYes:

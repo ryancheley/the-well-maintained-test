@@ -179,7 +179,7 @@ def well_used(api_url, headers):
 def commit_in_last_year(commits_url, headers):
     print("[bold]11. Has there been a commit in the last year?")
     r = requests.get(commits_url, headers=headers).json()
-    last_commit_date = r[0].get("commit").get("author").get("date")
+    last_commit_date = r.get("commit").get("author").get("date")
     last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
     days_since_last_commit = (datetime.utcnow() - last_commit_date).days
     if days_since_last_commit > 365:
