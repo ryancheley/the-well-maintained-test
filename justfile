@@ -6,3 +6,6 @@ test:
 
 check:
     pre-commit run --all-files
+
+coverage:
+    open htmlcov/index.html
