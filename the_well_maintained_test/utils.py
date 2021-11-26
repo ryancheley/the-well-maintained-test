@@ -1,3 +1,4 @@
+import base64
 import re
 from collections import namedtuple
 from datetime import datetime
@@ -8,7 +9,7 @@ from rich import print
 from rich.prompt import Confirm
 
 
-def yes_no(question):
+def yes_no(question: str) -> str:
     answer = Confirm.ask(question)
     if answer:
         return "[bold green]\tYes[bold]"
@@ -36,7 +37,7 @@ def production_ready_check(pypi_api_url):
     return message
 
 
-def documentation_exists(pypi_api_url):
+def documentation_exists(pypi_api_url: str) -> str:
     print("2. Is there sufficient documentation?")
     response = requests.get(pypi_api_url).json()
     docs = response.get("info").get("project_urls").get("Documentation")
@@ -47,7 +48,7 @@ def documentation_exists(pypi_api_url):
     return message
 
 
-def change_log_check(changelog, release):
+def change_log_check(changelog: requests.models.Response, release: requests.models.Response) -> str:
     print("3. Is there a changelog?")
     if changelog.status_code == 200 or release.status_code == 200:
         return "[bold green]\tYes[bold]"
@@ -55,7 +56,7 @@ def change_log_check(changelog, release):
         return "[bold red]\tNo[bold]"
 
 
-def bug_responding(bugs_url, headers):
+def bug_responding(bugs_url: str, headers: dict) -> str:
     print("4. Is someone responding to bug reports?")
     r = requests.get(bugs_url, headers=headers).json()
     open_bug_count = len(r)
@@ -80,7 +81,7 @@ def bug_responding(bugs_url, headers):
     return message
 
 
-def _get_bug_comment_list(url, headers):
+def _get_bug_comment_list(url: str, headers: dict) -> list:
     BugComments = namedtuple("BugComments", ["text", "create_date"])
     bug_comment_list = []
     timeline = requests.get(url, headers=headers).json()[-1]
@@ -91,7 +92,7 @@ def _get_bug_comment_list(url, headers):
     return bug_comment_list
 
 
-def check_tests(tree_url, headers):
+def check_tests(tree_url: str, headers: dict) -> str:
     print("5. Are there sufficient tests?")
     r = requests.get(tree_url, headers=headers).json()
     test_list = []
@@ -108,7 +109,7 @@ def check_tests(tree_url, headers):
     return message
 
 
-def language_check(pypi_url):
+def language_check(pypi_url: str) -> str:
     """
     6. Are the tests running with the latest Language version?
     """
@@ -122,7 +123,7 @@ def language_check(pypi_url):
     return message
 
 
-def framework_check(pypi_url):
+def framework_check(pypi_url: str) -> str:
     """
     7. Are the tests running with the latest Integration version?
     """
@@ -138,7 +139,7 @@ def framework_check(pypi_url):
     return message
 
 
-def ci_setup(workflows_url, headers):
+def ci_setup(workflows_url: str, headers: dict) -> str:
     print("8. Is there a Continuous Integration (CI) configuration?")
     r = requests.get(workflows_url, headers=headers).json()
     if r.get("total_count") > 0:
@@ -150,7 +151,7 @@ def ci_setup(workflows_url, headers):
         return "[bold red]There is no CI set up![bold]"
 
 
-def ci_passing(ci_status_url, headers):
+def ci_passing(ci_status_url: str, headers: dict) -> str:
     print("[bold]9. Is the CI passing?")
     r = requests.get(ci_status_url, headers=headers).json()
     conclusion = r.get("workflow_runs")[0].get("conclusion")
@@ -160,7 +161,7 @@ def ci_passing(ci_status_url, headers):
         return "\t[red]No"
 
 
-def well_used(api_url, headers):
+def well_used(api_url: str, headers: dict) -> str:
     print("[bold]10. Does it seem relatively well used?")
 
     r = requests.get(api_url, headers=headers).json()
@@ -176,7 +177,7 @@ def well_used(api_url, headers):
     return message
 
 
-def commit_in_last_year(commits_url, headers):
+def commit_in_last_year(commits_url: str, headers: dict) -> str:
     print("[bold]11. Has there been a commit in the last year?")
     r = requests.get(commits_url, headers=headers).json()
     last_commit_date = r.get("commit").get("author").get("date")
@@ -191,7 +192,7 @@ def commit_in_last_year(commits_url, headers):
     return message
 
 
-def release_in_last_year(pypi_api_url):
+def release_in_last_year(pypi_api_url: str) -> str:
     print("[bold]12. Has there been a release in the last year?")
     r = requests.get(pypi_api_url).json()
     releases = list(r.get("releases"))
@@ -206,3 +207,18 @@ def release_in_last_year(pypi_api_url):
         message += f" which was {days_since_last_release} days ago"
 
     return message
+
+
+def _get_content(url: str, headers: dict) -> bytes:
+    response = requests.get(url, headers=headers).json()
+    if response.get("encoding") != "base64":
+        raise TypeError
+    else:
+        content = response.get("content")
+    return content
+
+
+def _test_method_count(content: bytes) -> int:
+    content_list = str(base64.b64decode(content)).split("\\n")
+    test_methods = [s for s in content_list if "test_" in s]
+    return len(test_methods)

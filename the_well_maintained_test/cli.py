@@ -51,7 +51,7 @@ def cli():  # pragma: no cover
     default="auth.json",
     help="Path to save tokens to, defaults to auth.json",
 )
-def auth(auth):  # pragma: no cover
+def auth(auth: str) -> None:  # pragma: no cover
     "Save authentication credentials to a JSON file"
     click.echo("Create a GitHub personal user token and paste it here:")
     click.echo()
@@ -76,7 +76,7 @@ def auth(auth):  # pragma: no cover
     type=click.STRING,
     help="Branch to check",
 )
-def url(url, branch):  # pragma: no cover
+def url(url: str, branch: str) -> None:  # pragma: no cover
     "url to a github repository you'd like to check"
     if url[-1] == "/":
         url = url.strip("/")
@@ -135,7 +135,7 @@ def url(url, branch):  # pragma: no cover
     default="all",
     help="List of questions that are tested",
 )
-def questions(question):  # pragma: no cover
+def questions(question: str) -> None:  # pragma: no cover
     "List of questions tested"
     questions = {
         "1": "1. Is it described as “production ready”?",
