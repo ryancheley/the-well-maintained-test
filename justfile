@@ -5,7 +5,7 @@ test:
     open htmlcov/index.html
 
 # runs the pre-commit check command
-check:
+check: mypy
     pre-commit run --all-files
 
 # opens the coverage index
@@ -19,3 +19,8 @@ prune:
 # removes all but main and dev local branch
 gitclean:
     git branch | grep -v "main" | grep -v "dev"| xargs git branch -D
+
+
+# run mypy on the files
+mypy: 
+    mypy the_well_maintained_test/*.py
