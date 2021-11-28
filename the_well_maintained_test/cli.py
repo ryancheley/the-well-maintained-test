@@ -54,7 +54,6 @@ def cli():  # pragma: no cover
 def auth(auth: str) -> None:  # pragma: no cover
     "Save authentication credentials to a JSON file"
     click.echo("Create a GitHub personal user token and paste it here:")
-    click.echo()
     personal_token = click.prompt("Personal token")
     if pathlib.Path(auth).exists():
         auth_data = json.load(open(auth))
@@ -76,7 +75,14 @@ def auth(auth: str) -> None:  # pragma: no cover
     type=click.STRING,
     help="Branch to check",
 )
-def url(url: str, branch: str) -> None:  # pragma: no cover
+@click.option(
+    "-p",
+    "--progress",
+    type=click.BOOL,
+    default=True,
+    help="Show progress on test check",
+)
+def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     "url to a github repository you'd like to check"
     if url[-1] == "/":
         url = url.strip("/")
@@ -110,7 +116,7 @@ def url(url: str, branch: str) -> None:  # pragma: no cover
 
     print(bug_responding(bugs_url, headers))
 
-    print(check_tests(tree_url, headers))
+    print(check_tests(tree_url, headers, progress))
 
     print(language_check(pypi_url))
 
@@ -137,20 +143,9 @@ def url(url: str, branch: str) -> None:  # pragma: no cover
 )
 def questions(question: str) -> None:  # pragma: no cover
     "List of questions tested"
-    questions = {
-        "1": "1. Is it described as “production ready”?",
-        "2": "2. Is there sufficient documentation?",
-        "3": "3. Is there a changelog?",
-        "4": "4. Is someone responding to bug reports?",
-        "5": "5. Are there sufficient tests?",
-        "6": "6. Are the tests running with the latest <Language> version?",
-        "7": "7. Are the tests running with the latest <Integration> version?",
-        "8": "8. Is there a Continuous Integration (CI) configuration?",
-        "9": "9. Is the CI passing?",
-        "10": "10. Does it seem relatively well used?",
-        "11": "11. Has there been a commit in the last year?",
-        "12": "12. Has there been a release in the last year?",
-    }
+    with open("questions.json") as f:
+        questions = json.load(f)
+
     if question != "all":
         print(questions.get(question))
     else:
