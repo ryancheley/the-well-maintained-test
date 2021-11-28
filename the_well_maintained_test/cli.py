@@ -4,9 +4,9 @@ from urllib.parse import urlparse
 
 import click
 import requests
-from rich import print
 from rich.console import Console
 from rich.padding import Padding
+from rich.prompt import Prompt
 
 from .utils import (
     bug_responding,
@@ -25,7 +25,7 @@ from .utils import (
 
 console = Console()
 question_style = "bold blue"
-answer_style = ""
+answer_style = "italic"
 answer_padding_style = (1, 0, 1, 4)
 special_answer_padding_style = (0, 0, 0, 4)
 
@@ -61,8 +61,8 @@ def cli():  # pragma: no cover
 )
 def auth(auth: str) -> None:  # pragma: no cover
     "Save authentication credentials to a JSON file"
-    click.echo("Create a GitHub personal user token and paste it here:")
-    personal_token = click.prompt("Personal token")
+    console.print("Create a GitHub personal user token and paste it here:")
+    personal_token = Prompt.ask("Personal token")
     if pathlib.Path(auth).exists():
         auth_data = json.load(open(auth))
     else:
@@ -168,7 +168,7 @@ def questions(question: str) -> None:  # pragma: no cover
         questions = json.load(f)
 
     if question != "all":
-        print(questions.get(question))
+        console.print(questions.get(question), style=question_style)
     else:
         for _, v in questions.items():
-            print(v)
+            console.print(v, style=question_style)
