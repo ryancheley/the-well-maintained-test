@@ -6,30 +6,21 @@ from operator import attrgetter
 
 import requests
 from rich import print
-from rich.prompt import Confirm
+from rich.progress import Progress
 
 
-def yes_no(question: str) -> str:
-    answer = Confirm.ask(question)
-    if answer:
-        return "[bold green]\tYes[bold]"
-    else:
-        return "[bold red]\tNo[bold]"
-
-
-def production_ready_check(pypi_api_url):
+def production_ready_check(pypi_api_url: str) -> str:
     print("1. Is it described as 'production ready'?")
     response = requests.get(pypi_api_url).json()
     classifiers = response.get("info").get("classifiers")
     version = response.get("info").get("version")
-    development_status = []
     try:
         development_status = [s for s in classifiers if "Development Status" in s][0]
+        development_status_start_point = re.search(r"Development Status :: [\d] \- ", development_status).span()[1]
         development_status_str_len = len(development_status)
-        development_status_start_point = re.search(r"Development Status :: [\d] \- ", development_status).span(0)[1]
         status = development_status[(development_status_start_point - development_status_str_len) :]
     except IndexError:
-        pass
+        development_status = []
     if development_status:
         message = f"\t[bold green]The project is set to Development Status[bold] [blue]{status}"
     else:
@@ -92,20 +83,27 @@ def _get_bug_comment_list(url: str, headers: dict) -> list:
     return bug_comment_list
 
 
-def check_tests(tree_url: str, headers: dict) -> str:
+def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
     print("5. Are there sufficient tests?")
-    r = requests.get(tree_url, headers=headers).json()
-    test_list = []
-    for i in r.get("tree"):
-        if i.get("type") == "blob":
-            test_list.append(i.get("path"))
-    test_list = [s for s in test_list if re.search(r"test_(.*).py", s)]
-    if len(test_list) == 0:
+    test_list = _get_test_files(tree_url, headers=headers)
+    total = len(test_list)
+    test_files = 0
+    test_functions = 0
+    with Progress() as progress:
+        test_file_reading_task = progress.add_task("[green]Processing...", total=total, visible=show_progress)
+        for i in test_list:
+            content = _get_content(i.get("url"), headers)
+            test_count = _test_method_count(content)
+            test_files += 1
+            test_functions = test_functions + test_count
+            progress.update(test_file_reading_task, advance=1)
+        progress.remove_task(test_file_reading_task)
+    if test_files == 0:
         message = "\t[bold red]There are 0 tests![bold]"
     else:
-        message = f"\t[bold green]There are {len(test_list)} tests:[bold]\n"
+        message = f"\t[bold green]There are {test_functions} tests in {test_files} files:[bold]\n"
         for test in test_list:
-            message += f"\t\t- {test}\n"
+            message += f"\t\t- {test.get('path')}\n"
     return message
 
 
@@ -222,3 +220,13 @@ def _test_method_count(content: bytes) -> int:
     content_list = str(base64.b64decode(content)).split("\\n")
     test_methods = [s for s in content_list if "test_" in s]
     return len(test_methods)
+
+
+def _get_test_files(url: str, headers: dict) -> list:
+    test_file_list = []
+    r = requests.get(url, headers=headers).json()
+    for i in r.get("tree"):
+        if i.get("type") == "blob" and re.search(r"test_(.*).py", i.get("path")):
+            test_file_list.append(i)
+
+    return test_file_list
