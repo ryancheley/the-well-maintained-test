@@ -38,6 +38,7 @@ from tests.test_classes import (
     MockResponseWellUsed,
 )
 from the_well_maintained_test.cli import cli
+from the_well_maintained_test.helpers import _check_verb_agreement
 from the_well_maintained_test.utils import (
     _get_bug_comment_list,
     _get_content,
@@ -176,7 +177,7 @@ def test_bug_response_yes_no_response(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = bug_responding(url, headers=headers)
-    expected = "[red]There are 1 bugs with no comments"
+    expected = "[red]There is 1 bugs with no comments"
     assert actual == expected
 
 
@@ -193,7 +194,7 @@ def test_ci_setup_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_setup(url, headers=headers)
-    expected = "[green]There are 1 workflows\n[green]- Test\n"
+    expected = "[green]There is 1 workflows\n[green]- Test\n"
     assert actual == expected
 
 
@@ -719,3 +720,16 @@ def test__get_release_date():
         Release(version="9.9.0", upload_time="2021-01-16T15:12:25"),
     ]
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        [0, "are"],
+        [1, "is"],
+        [2, "are"],
+        [-1, "are"],
+    ],
+)
+def test__check_verb_agreement(test_input, expected):
+    assert _check_verb_agreement(test_input) == expected

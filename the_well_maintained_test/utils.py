@@ -1,12 +1,18 @@
-import base64
 import re
-from collections import namedtuple
 from datetime import datetime
 from operator import attrgetter
-from typing import List
 
 import requests
 from rich.progress import Progress
+
+from the_well_maintained_test.helpers import (
+    _check_verb_agreement,
+    _get_bug_comment_list,
+    _get_content,
+    _get_release_date,
+    _get_test_files,
+    _test_method_count,
+)
 
 
 def production_ready_check(pypi_api_url: str) -> str:
@@ -68,19 +74,9 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
             message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
             message = f"[green]{message1}\n{message2}"
         else:
-            message = f"[red]There are {open_bug_count} bugs with no comments"
+            verb = _check_verb_agreement(open_bug_count)
+            message = f"[red]There {verb} {open_bug_count} bugs with no comments"
     return message
-
-
-def _get_bug_comment_list(url: str, headers: dict) -> list:
-    BugComments = namedtuple("BugComments", ["text", "create_date"])
-    bug_comment_list = []
-    timeline = requests.get(url, headers=headers).json()[-1]
-    if timeline.get("event") == "commented":
-        bug_comment = timeline.get("body")
-        bug_comment_date = datetime.strptime(timeline.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-        bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
-    return bug_comment_list
 
 
 def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
@@ -103,7 +99,8 @@ def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
     if test_files == 0:
         message = "[red]There are 0 tests!"
     else:
-        message = f"[green]There are {test_functions} tests in {test_files} files:\n"
+        verb = _check_verb_agreement(test_functions)
+        message = f"[green]There {verb} {test_functions} tests in {test_files} files:\n"
         for test in test_list:
             message += f"- {test.get('path')}\n"
     return message
@@ -144,7 +141,9 @@ def ci_setup(workflows_url: str, headers: dict) -> str:
     """
     r = requests.get(workflows_url, headers=headers).json()
     if r.get("total_count") > 0:
-        message = f"[green]There are {r.get('total_count')} workflows\n"
+        workflow_count = r.get("total_count")
+        verb = _check_verb_agreement(workflow_count)
+        message = f"[green]There {verb} {workflow_count} workflows\n"
         for i in r.get("workflows"):
             message += f"[green]- {i.get('name')}\n"
         return message
@@ -215,38 +214,3 @@ def release_in_last_year(pypi_api_url: str) -> str:
         message += f" which was {days_since_last_release} days ago"
 
     return message
-
-
-def _get_content(url: str, headers: dict) -> bytes:
-    response = requests.get(url, headers=headers).json()
-    if response.get("encoding") != "base64":
-        raise TypeError
-    else:
-        content = response.get("content")
-    return content
-
-
-def _test_method_count(content: bytes) -> int:
-    content_list = str(base64.b64decode(content)).split("\\n")
-    test_methods = [s for s in content_list if "test_" in s]
-    return len(test_methods)
-
-
-def _get_test_files(url: str, headers: dict) -> list:
-    test_file_list = []
-    r = requests.get(url, headers=headers).json()
-    for i in r.get("tree"):
-        if i.get("type") == "blob" and re.search(r"test_(.*).py", i.get("path")):
-            test_file_list.append(i)
-
-    return test_file_list
-
-
-def _get_release_date(release: dict) -> List:
-    Release = namedtuple("Release", "version, upload_time")
-    releases = []
-    for k, v in release.items():
-        if not re.search(r"[a-zA-Z]", k):
-            releases.append(Release(k, v[0].get("upload_time")))
-    releases = sorted(releases, key=attrgetter("upload_time"), reverse=True)
-    return releases
