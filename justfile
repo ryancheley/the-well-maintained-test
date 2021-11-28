@@ -23,4 +23,4 @@ gitclean:
 
 # run mypy on the files
 mypy: 
-    mypy the_well_maintained_test/*.py
+    mypy the_well_maintained_test/*.py --no-strict-optional
