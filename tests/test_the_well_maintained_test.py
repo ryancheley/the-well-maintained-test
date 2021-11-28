@@ -1,6 +1,5 @@
 from collections import namedtuple
 from datetime import date, datetime
-from io import StringIO
 
 import pytest
 import requests
@@ -23,6 +22,8 @@ from tests.test_classes import (
     MockResponseCommentList,
     MockResponseCommitsNo,
     MockResponseCommitsYes,
+    MockResponseContentBase64,
+    MockResponseContentNotBase64,
     MockResponseDocumentationNo,
     MockResponseDocumentationYes,
     MockResponseFrameworkCheck,
@@ -31,11 +32,17 @@ from tests.test_classes import (
     MockResponseProductionReadyYes,
     MockResponseReleasesNo,
     MockResponseReleasesYes,
+    MockResponseTestFilesDoNotExist,
+    MockResponseTestFilesExist,
+    MockResponseTestFilesNoBlobs,
     MockResponseWellUsed,
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.utils import (
     _get_bug_comment_list,
+    _get_content,
+    _get_test_files,
+    _test_method_count,
     bug_responding,
     change_log_check,
     check_tests,
@@ -48,7 +55,6 @@ from the_well_maintained_test.utils import (
     production_ready_check,
     release_in_last_year,
     well_used,
-    yes_no,
 )
 
 
@@ -58,21 +64,6 @@ def test_version():
         result = runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
         assert result.output.startswith("cli, version ")
-
-
-@pytest.mark.parametrize(
-    "test_input,expected",
-    [["y\n", "[bold green]\tYes[bold]"], ["n\n", "[bold red]\tNo[bold]"]],
-)
-def test_yes_no(monkeypatch, test_input, expected):
-    """
-    5. Are there sufficient tests?
-    6. Are the tests running with the latest Language version?
-    7. Are the tests running with the latest Integration version?
-    """
-    number_inputs = StringIO(test_input)
-    monkeypatch.setattr("sys.stdin", number_inputs)
-    assert yes_no("test") == expected
 
 
 @pytest.mark.parametrize(
@@ -474,6 +465,7 @@ def test_framework_check_does_not_exist(monkeypatch):
     assert actual == expected
 
 
+# TODO: Rewrite test
 def test_check_tests_exist(monkeypatch):
     """
     5. Are there sufficient tests?
@@ -483,15 +475,78 @@ def test_check_tests_exist(monkeypatch):
     def mock_get(*args, **kwargs):
         return MockGitHubFileCheckAPIWithTestFiles()
 
-    # apply the monkeypatch for requests.get to mock_get
+    def mock__get_content(url, headers):
+        content = """
+ZnJvbSBmdW5jdG9vbHMgaW1wb3J0IHBhcnRpYWwKZnJvbSBpbnNwZWN0IGlt
+cG9ydCBQYXJhbWV0ZXIsIFNpZ25hdHVyZSwgc2lnbmF0dXJlCmZyb20gaW8g
+aW1wb3J0IFN0cmluZ0lPCmZyb20gdW5pdHRlc3QgaW1wb3J0IG1vY2sKCmlt
+cG9ydCBweXRlc3QKZnJvbSBkamFuZ28uY29yZS5tYW5hZ2VtZW50IGltcG9y
+dCBCYXNlQ29tbWFuZCwgQ29tbWFuZEVycm9yLCBjYWxsX2NvbW1hbmQKZnJv
+bSBkamFuZ28udGVzdCBpbXBvcnQgU2ltcGxlVGVzdENhc2UKZnJvbSByaWNo
+LmNvbnNvbGUgaW1wb3J0IENvbnNvbGUKCmZyb20gZGphbmdvX3JpY2gubWFu
+YWdlbWVudCBpbXBvcnQgUmljaENvbW1hbmQKZnJvbSB0ZXN0cy50ZXN0YXBw
+Lm1hbmFnZW1lbnQuY29tbWFuZHMuZXhhbXBsZSBpbXBvcnQgQ29tbWFuZCBh
+cyBFeGFtcGxlQ29tbWFuZAoKCmRlZiBzdHJpcF9hbm5vdGF0aW9ucyhvcmln
+aW5hbDogU2lnbmF0dXJlKSAtPiBTaWduYXR1cmU6CiAgICByZXR1cm4gU2ln
+bmF0dXJlKAogICAgICAgIHBhcmFtZXRlcnM9WwogICAgICAgICAgICBwYXJh
+bS5yZXBsYWNlKGFubm90YXRpb249UGFyYW1ldGVyLmVtcHR5KQogICAgICAg
+ICAgICBmb3IgcGFyYW0gaW4gb3JpZ2luYWwucGFyYW1ldGVycy52YWx1ZXMo
+KQogICAgICAgIF0KICAgICkKCgpjbGFzcyBGYWtlVHR5U3RyaW5nSU8oU3Ry
+aW5nSU8pOgogICAgZGVmIGlzYXR0eShzZWxmKSAtPiBib29sOgogICAgICAg
+IHJldHVybiBUcnVlCgoKY2xhc3MgUmljaENvbW1hbmRUZXN0cyhTaW1wbGVU
+ZXN0Q2FzZSk6CiAgICBkZWYgdGVzdF9pbml0X3NpZ25hdHVyZShzZWxmKToK
+ICAgICAgICByY19zaWduYXR1cmUgPSBzdHJpcF9hbm5vdGF0aW9ucyhzaWdu
+YXR1cmUoUmljaENvbW1hbmQuX19pbml0X18pKQoKICAgICAgICBhc3NlcnQg
+cmNfc2lnbmF0dXJlID09IHNpZ25hdHVyZShCYXNlQ29tbWFuZC5fX2luaXRf
+XykKCiAgICBkZWYgdGVzdF9leGVjdXRlX3NpZ25hdHVyZShzZWxmKToKICAg
+ICAgICByY19zaWduYXR1cmUgPSBzdHJpcF9hbm5vdGF0aW9ucyhzaWduYXR1
+cmUoUmljaENvbW1hbmQuZXhlY3V0ZSkpCgogICAgICAgIGFzc2VydCByY19z
+aWduYXR1cmUgPT0gc2lnbmF0dXJlKEJhc2VDb21tYW5kLmV4ZWN1dGUpCgog
+ICAgZGVmIHRlc3RfY29tYmluZWRfY29sb3JfZmxhZ3NfZXJyb3Ioc2VsZik6
+CiAgICAgICAgd2l0aCBweXRlc3QucmFpc2VzKENvbW1hbmRFcnJvcikgYXMg
+ZXhjaW5mbzoKICAgICAgICAgICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwg
+Ii0tbm8tY29sb3IiLCAiLS1mb3JjZS1jb2xvciIpCgogICAgICAgIGFzc2Vy
+dCAoCiAgICAgICAgICAgIHN0cihleGNpbmZvLnZhbHVlKQogICAgICAgICAg
+ICA9PSAiVGhlIC0tbm8tY29sb3IgYW5kIC0tZm9yY2UtY29sb3Igb3B0aW9u
+cyBjYW4ndCBiZSB1c2VkIHRvZ2V0aGVyLiIKICAgICAgICApCgogICAgZGVm
+IHRlc3Rfb3V0cHV0X25vbl90dHkoc2VsZik6CiAgICAgICAgc3Rkb3V0ID0g
+U3RyaW5nSU8oKQoKICAgICAgICBjYWxsX2NvbW1hbmQoImV4YW1wbGUiLCBz
+dGRvdXQ9c3Rkb3V0KQoKICAgICAgICBhc3NlcnQgc3Rkb3V0LmdldHZhbHVl
+KCkgPT0gIkFsZXJ0IVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF90dHkoc2Vs
+Zik6CiAgICAgICAgc3Rkb3V0ID0gRmFrZVR0eVN0cmluZ0lPKCkKCiAgICAg
+ICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwgc3Rkb3V0PXN0ZG91dCkKCiAg
+ICAgICAgYXNzZXJ0IHN0ZG91dC5nZXR2YWx1ZSgpID09ICJceDFiWzE7MzFt
+QWxlcnQhXHgxYlswbVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF90dHlfbm9f
+Y29sb3Ioc2VsZik6CiAgICAgICAgc3Rkb3V0ID0gRmFrZVR0eVN0cmluZ0lP
+KCkKCiAgICAgICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwgIi0tbm8tY29s
+b3IiLCBzdGRvdXQ9c3Rkb3V0KQoKICAgICAgICBhc3NlcnQgc3Rkb3V0Lmdl
+dHZhbHVlKCkgPT0gIkFsZXJ0IVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF9m
+b3JjZV9jb2xvcihzZWxmKToKICAgICAgICBzdGRvdXQgPSBTdHJpbmdJTygp
+CgogICAgICAgIGNhbGxfY29tbWFuZCgiZXhhbXBsZSIsICItLWZvcmNlLWNv
+bG9yIiwgc3Rkb3V0PXN0ZG91dCkKCiAgICAgICAgYXNzZXJ0IHN0ZG91dC5n
+ZXR2YWx1ZSgpID09ICJceDFiWzE7MzFtQWxlcnQhXHgxYlswbVxuIgoKICAg
+IGRlZiB0ZXN0X291dHB1dF9tYWtlX3JpY2hfY29uc29sZShzZWxmKToKICAg
+ICAgICBzdGRvdXQgPSBGYWtlVHR5U3RyaW5nSU8oKQogICAgICAgIG1ha2Vf
+Y29uc29sZSA9IHBhcnRpYWwoQ29uc29sZSwgbWFya3VwPUZhbHNlLCBoaWdo
+bGlnaHQ9RmFsc2UpCiAgICAgICAgcGF0Y2hlciA9IG1vY2sucGF0Y2gub2Jq
+ZWN0KEV4YW1wbGVDb21tYW5kLCAibWFrZV9yaWNoX2NvbnNvbGUiLCBtYWtl
+X2NvbnNvbGUpCgogICAgICAgIHdpdGggcGF0Y2hlcjoKICAgICAgICAgICAg
+Y2FsbF9jb21tYW5kKCJleGFtcGxlIiwgc3Rkb3V0PXN0ZG91dCkKCiAgICAg
+ICAgYXNzZXJ0IHN0ZG91dC5nZXR2YWx1ZSgpID09ICJbYm9sZCByZWRdQWxl
+cnQhWy9ib2xkIHJlZF1cbiIK
+        """
+        return content
+
+    # # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
+    monkeypatch.setattr("the_well_maintained_test.utils._get_content", mock__get_content)
     url = "https://fakeurl"
-    actual = check_tests(url, headers=headers)
-    expected = "\t[bold green]There are 1 tests:[bold]\n\t\t- tests/admin_changelist/test_date_hierarchy.py\n"
+    actual = check_tests(url, headers=headers, show_progress=True)
+    expected = "\t[bold green]There are 8 tests in 1 files:[bold]\n\t\t- tests/admin_changelist/test_date_hierarchy.py\n"
     assert actual == expected
 
 
-def test_check_tests_do_not_exis(monkeypatch):
+def test_check_tests_do_not_exist(monkeypatch):
     """
     5. Are there sufficient tests?
     """
@@ -503,6 +558,135 @@ def test_check_tests_do_not_exis(monkeypatch):
     # apply the monkeypatch for requests.get to mock_get
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
-    actual = check_tests(url, headers=headers)
+    actual = check_tests(url, headers=headers, show_progress=True)
     expected = "\t[bold red]There are 0 tests![bold]"
+    assert actual == expected
+
+
+def test__get_content_base64(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseContentBase64()
+
+    headers = {}
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = _get_content(url, headers)
+    expected = "test"
+    assert actual == expected
+
+
+def test__get_content_not_base64(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseContentNotBase64()
+
+    headers = {}
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    with pytest.raises(TypeError):
+        _get_content(url, headers)
+
+
+def test__test_method_count():
+    content = """
+ZnJvbSBmdW5jdG9vbHMgaW1wb3J0IHBhcnRpYWwKZnJvbSBpbnNwZWN0IGlt
+cG9ydCBQYXJhbWV0ZXIsIFNpZ25hdHVyZSwgc2lnbmF0dXJlCmZyb20gaW8g
+aW1wb3J0IFN0cmluZ0lPCmZyb20gdW5pdHRlc3QgaW1wb3J0IG1vY2sKCmlt
+cG9ydCBweXRlc3QKZnJvbSBkamFuZ28uY29yZS5tYW5hZ2VtZW50IGltcG9y
+dCBCYXNlQ29tbWFuZCwgQ29tbWFuZEVycm9yLCBjYWxsX2NvbW1hbmQKZnJv
+bSBkamFuZ28udGVzdCBpbXBvcnQgU2ltcGxlVGVzdENhc2UKZnJvbSByaWNo
+LmNvbnNvbGUgaW1wb3J0IENvbnNvbGUKCmZyb20gZGphbmdvX3JpY2gubWFu
+YWdlbWVudCBpbXBvcnQgUmljaENvbW1hbmQKZnJvbSB0ZXN0cy50ZXN0YXBw
+Lm1hbmFnZW1lbnQuY29tbWFuZHMuZXhhbXBsZSBpbXBvcnQgQ29tbWFuZCBh
+cyBFeGFtcGxlQ29tbWFuZAoKCmRlZiBzdHJpcF9hbm5vdGF0aW9ucyhvcmln
+aW5hbDogU2lnbmF0dXJlKSAtPiBTaWduYXR1cmU6CiAgICByZXR1cm4gU2ln
+bmF0dXJlKAogICAgICAgIHBhcmFtZXRlcnM9WwogICAgICAgICAgICBwYXJh
+bS5yZXBsYWNlKGFubm90YXRpb249UGFyYW1ldGVyLmVtcHR5KQogICAgICAg
+ICAgICBmb3IgcGFyYW0gaW4gb3JpZ2luYWwucGFyYW1ldGVycy52YWx1ZXMo
+KQogICAgICAgIF0KICAgICkKCgpjbGFzcyBGYWtlVHR5U3RyaW5nSU8oU3Ry
+aW5nSU8pOgogICAgZGVmIGlzYXR0eShzZWxmKSAtPiBib29sOgogICAgICAg
+IHJldHVybiBUcnVlCgoKY2xhc3MgUmljaENvbW1hbmRUZXN0cyhTaW1wbGVU
+ZXN0Q2FzZSk6CiAgICBkZWYgdGVzdF9pbml0X3NpZ25hdHVyZShzZWxmKToK
+ICAgICAgICByY19zaWduYXR1cmUgPSBzdHJpcF9hbm5vdGF0aW9ucyhzaWdu
+YXR1cmUoUmljaENvbW1hbmQuX19pbml0X18pKQoKICAgICAgICBhc3NlcnQg
+cmNfc2lnbmF0dXJlID09IHNpZ25hdHVyZShCYXNlQ29tbWFuZC5fX2luaXRf
+XykKCiAgICBkZWYgdGVzdF9leGVjdXRlX3NpZ25hdHVyZShzZWxmKToKICAg
+ICAgICByY19zaWduYXR1cmUgPSBzdHJpcF9hbm5vdGF0aW9ucyhzaWduYXR1
+cmUoUmljaENvbW1hbmQuZXhlY3V0ZSkpCgogICAgICAgIGFzc2VydCByY19z
+aWduYXR1cmUgPT0gc2lnbmF0dXJlKEJhc2VDb21tYW5kLmV4ZWN1dGUpCgog
+ICAgZGVmIHRlc3RfY29tYmluZWRfY29sb3JfZmxhZ3NfZXJyb3Ioc2VsZik6
+CiAgICAgICAgd2l0aCBweXRlc3QucmFpc2VzKENvbW1hbmRFcnJvcikgYXMg
+ZXhjaW5mbzoKICAgICAgICAgICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwg
+Ii0tbm8tY29sb3IiLCAiLS1mb3JjZS1jb2xvciIpCgogICAgICAgIGFzc2Vy
+dCAoCiAgICAgICAgICAgIHN0cihleGNpbmZvLnZhbHVlKQogICAgICAgICAg
+ICA9PSAiVGhlIC0tbm8tY29sb3IgYW5kIC0tZm9yY2UtY29sb3Igb3B0aW9u
+cyBjYW4ndCBiZSB1c2VkIHRvZ2V0aGVyLiIKICAgICAgICApCgogICAgZGVm
+IHRlc3Rfb3V0cHV0X25vbl90dHkoc2VsZik6CiAgICAgICAgc3Rkb3V0ID0g
+U3RyaW5nSU8oKQoKICAgICAgICBjYWxsX2NvbW1hbmQoImV4YW1wbGUiLCBz
+dGRvdXQ9c3Rkb3V0KQoKICAgICAgICBhc3NlcnQgc3Rkb3V0LmdldHZhbHVl
+KCkgPT0gIkFsZXJ0IVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF90dHkoc2Vs
+Zik6CiAgICAgICAgc3Rkb3V0ID0gRmFrZVR0eVN0cmluZ0lPKCkKCiAgICAg
+ICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwgc3Rkb3V0PXN0ZG91dCkKCiAg
+ICAgICAgYXNzZXJ0IHN0ZG91dC5nZXR2YWx1ZSgpID09ICJceDFiWzE7MzFt
+QWxlcnQhXHgxYlswbVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF90dHlfbm9f
+Y29sb3Ioc2VsZik6CiAgICAgICAgc3Rkb3V0ID0gRmFrZVR0eVN0cmluZ0lP
+KCkKCiAgICAgICAgY2FsbF9jb21tYW5kKCJleGFtcGxlIiwgIi0tbm8tY29s
+b3IiLCBzdGRvdXQ9c3Rkb3V0KQoKICAgICAgICBhc3NlcnQgc3Rkb3V0Lmdl
+dHZhbHVlKCkgPT0gIkFsZXJ0IVxuIgoKICAgIGRlZiB0ZXN0X291dHB1dF9m
+b3JjZV9jb2xvcihzZWxmKToKICAgICAgICBzdGRvdXQgPSBTdHJpbmdJTygp
+CgogICAgICAgIGNhbGxfY29tbWFuZCgiZXhhbXBsZSIsICItLWZvcmNlLWNv
+bG9yIiwgc3Rkb3V0PXN0ZG91dCkKCiAgICAgICAgYXNzZXJ0IHN0ZG91dC5n
+ZXR2YWx1ZSgpID09ICJceDFiWzE7MzFtQWxlcnQhXHgxYlswbVxuIgoKICAg
+IGRlZiB0ZXN0X291dHB1dF9tYWtlX3JpY2hfY29uc29sZShzZWxmKToKICAg
+ICAgICBzdGRvdXQgPSBGYWtlVHR5U3RyaW5nSU8oKQogICAgICAgIG1ha2Vf
+Y29uc29sZSA9IHBhcnRpYWwoQ29uc29sZSwgbWFya3VwPUZhbHNlLCBoaWdo
+bGlnaHQ9RmFsc2UpCiAgICAgICAgcGF0Y2hlciA9IG1vY2sucGF0Y2gub2Jq
+ZWN0KEV4YW1wbGVDb21tYW5kLCAibWFrZV9yaWNoX2NvbnNvbGUiLCBtYWtl
+X2NvbnNvbGUpCgogICAgICAgIHdpdGggcGF0Y2hlcjoKICAgICAgICAgICAg
+Y2FsbF9jb21tYW5kKCJleGFtcGxlIiwgc3Rkb3V0PXN0ZG91dCkKCiAgICAg
+ICAgYXNzZXJ0IHN0ZG91dC5nZXR2YWx1ZSgpID09ICJbYm9sZCByZWRdQWxl
+cnQhWy9ib2xkIHJlZF1cbiIK
+    """
+    actual = _test_method_count(content)
+    expected = 8
+    assert actual == expected
+
+
+def test__get_test_files_exist(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseTestFilesExist()
+
+    headers = {}
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = _get_test_files(url, headers)
+    expected = [
+        {
+            "type": "blob",
+            "path": "tests/test_management.py",
+        }
+    ]
+    assert actual == expected
+
+
+def test__get_test_files_do_not_exist(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseTestFilesDoNotExist()
+
+    headers = {}
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = _get_test_files(url, headers)
+    expected = []
+    assert actual == expected
+
+
+def test__get_test_files_no_blobs(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseTestFilesNoBlobs()
+
+    headers = {}
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = _get_test_files(url, headers)
+    expected = []
     assert actual == expected

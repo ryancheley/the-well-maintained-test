@@ -291,3 +291,47 @@ class MockGitHubFileCheckAPIWithOutTestFiles:
                 },
             ],
         }
+
+
+class MockResponseContentBase64:
+    @staticmethod
+    def json():
+        return {"encoding": "base64", "content": "test"}
+
+
+class MockResponseContentNotBase64:
+    @staticmethod
+    def json():
+        return {"encoding": "notbase64"}
+
+
+class MockResponseTestFilesExist:
+    @staticmethod
+    def json():
+        return {
+            "tree": [
+                {
+                    "type": "blob",
+                    "path": "tests/test_management.py",
+                }
+            ]
+        }
+
+
+class MockResponseTestFilesDoNotExist:
+    @staticmethod
+    def json():
+        return {
+            "tree": [
+                {
+                    "type": "blob",
+                    "path": "requirements/py38-django40.txt",
+                }
+            ]
+        }
+
+
+class MockResponseTestFilesNoBlobs:
+    @staticmethod
+    def json():
+        return {"tree": [{"type": "tree"}]}
