@@ -66,8 +66,7 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
             message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
             message1 += "days to respond to the bug report"
             message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-            color = "green"
-            message = f"[{color}]{message1}\n{message2}"
+            message = f"[green]{message1}\n{message2}"
         else:
             message = f"[red]There are {open_bug_count} bugs with no comments"
     return message
