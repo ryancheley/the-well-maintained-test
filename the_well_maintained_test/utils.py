@@ -45,6 +45,10 @@ def change_log_check(changelog: requests.models.Response, release: requests.mode
 
 
 def bug_responding(bugs_url: str, headers: dict) -> str:
+    """
+    4. Is someone responding to bug reports?
+    """
+
     r = requests.get(bugs_url, headers=headers).json()
     open_bug_count = len(r)
     bug_comment_list = []
@@ -62,7 +66,8 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
             message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
             message1 += "days to respond to the bug report"
             message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-            message = f"[red]{message1}\n{message2}"
+            color = "green"
+            message = f"[{color}]{message1}\n{message2}"
         else:
             message = f"[red]There are {open_bug_count} bugs with no comments"
     return message
@@ -112,7 +117,7 @@ def language_check(pypi_url: str) -> str:
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
     languages = [s.replace("Programming Language :: Python :: ", "Python ") for s in classifiers if "Programming Language" in s]
-    message = "[blue]The project supports the following programming languages\n"
+    message = "[green]The project supports the following programming languages\n"
     for language in languages:
         message += f"- {language}\n"
     return message
@@ -128,9 +133,9 @@ def framework_check(pypi_url: str) -> str:
     frameworks = [s.replace("Framework Django", "Framework").replace(" ::", "") for s in classifiers if "Framework" in s]
     if frameworks:
         framework = [s for s in classifiers if "Framework" in s][-1].replace(" :: ", " ")
-        message = f"[blue]The project supports the following framework as it's latest[bold] {framework}"
+        message = f"[green]The project supports the following framework as it's latest[bold] {framework}"
     else:
-        message = "[blue]This project has no associated frameworks"
+        message = "[green]This project has no associated frameworks"
     return message
 
 
@@ -142,7 +147,7 @@ def ci_setup(workflows_url: str, headers: dict) -> str:
     if r.get("total_count") > 0:
         message = f"[green]There are {r.get('total_count')} workflows\n"
         for i in r.get("workflows"):
-            message += f"[blue]- {i.get('name')}\n"
+            message += f"[green]- {i.get('name')}\n"
         return message
     else:
         return "[red]There is no CI set up!"
@@ -174,7 +179,7 @@ def well_used(api_url: str, headers: dict) -> str:
     message += f"- Forks: {network_count}\n"
     message += f"- Open Issues: {open_issues}\n"
     message += f"- Subscribers: {subscribers_count}"
-    return message
+    return f"[green]{message}"
 
 
 def commit_in_last_year(commits_url: str, headers: dict) -> str:

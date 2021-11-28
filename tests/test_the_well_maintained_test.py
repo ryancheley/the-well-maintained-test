@@ -118,7 +118,7 @@ def test_bug_response_yes(monkeypatch):
     expected = bug_responding(url, headers=headers)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-    actual = f"[red]{message1}\n{message2}"
+    actual = f"[green]{message1}\n{message2}"
     assert expected == actual
 
 
@@ -193,7 +193,7 @@ def test_ci_setup_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_setup(url, headers=headers)
-    expected = "[green]There are 1 workflows\n[blue]- Test\n"
+    expected = "[green]There are 1 workflows\n[green]- Test\n"
     assert actual == expected
 
 
@@ -266,6 +266,7 @@ def test_well_used(monkeypatch):
     message += "- Forks: 6\n"
     message += "- Open Issues: 6\n"
     message += "- Subscribers: 10"
+    message = f"[green]{message}"
 
     expected = message
     assert actual == expected
@@ -430,7 +431,7 @@ def test_language_check(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = language_check(url)
-    expected = "[blue]The project supports the following programming languages\n- Python 3.6\n- Python 3.7\n"
+    expected = "[green]The project supports the following programming languages\n- Python 3.6\n- Python 3.7\n"
     assert actual == expected
 
 
@@ -446,7 +447,7 @@ def test_framework_check_exists(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = "[blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
+    expected = "[green]The project supports the following framework as it's latest[bold] Framework Django 3.2"
     assert actual == expected
 
 
@@ -462,7 +463,7 @@ def test_framework_check_does_not_exist(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = "[blue]This project has no associated frameworks"
+    expected = "[green]This project has no associated frameworks"
     assert actual == expected
 
 
