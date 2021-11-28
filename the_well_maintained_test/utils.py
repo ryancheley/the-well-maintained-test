@@ -3,14 +3,13 @@ import re
 from collections import namedtuple
 from datetime import datetime
 from operator import attrgetter
+from typing import List
 
 import requests
-from rich import print
 from rich.progress import Progress
 
 
 def production_ready_check(pypi_api_url: str) -> str:
-    print("1. Is it described as 'production ready'?")
     response = requests.get(pypi_api_url).json()
     classifiers = response.get("info").get("classifiers")
     version = response.get("info").get("version")
@@ -22,38 +21,35 @@ def production_ready_check(pypi_api_url: str) -> str:
     except IndexError:
         development_status = []
     if development_status:
-        message = f"\t[bold green]The project is set to Development Status[bold] [blue]{status}"
+        message = f"[green]The project is set to Development Status [underline]{status}"
     else:
-        message = f"\t[bold red]\tThere is no Development Status for this package. It is currently at version {version}[bold]"
+        message = f"[red]There is no Development Status for this package. It is currently at version {version}"
     return message
 
 
 def documentation_exists(pypi_api_url: str) -> str:
-    print("2. Is there sufficient documentation?")
     response = requests.get(pypi_api_url).json()
     docs = response.get("info").get("project_urls").get("Documentation")
     if docs:
-        message = f"\t[bold green]Documentation can be found at {docs}[bold]"
+        message = f"[green]Documentation can be found at {docs}"
     else:
-        message = "\t[bold red]There is no documentation for this project[bold]"
+        message = "[red]There is no documentation for this project"
     return message
 
 
 def change_log_check(changelog: requests.models.Response, release: requests.models.Response) -> str:
-    print("3. Is there a changelog?")
     if changelog.status_code == 200 or release.status_code == 200:
-        return "[bold green]\tYes[bold]"
+        return "[green]Yes"
     else:
-        return "[bold red]\tNo[bold]"
+        return "[red]No"
 
 
 def bug_responding(bugs_url: str, headers: dict) -> str:
-    print("4. Is someone responding to bug reports?")
     r = requests.get(bugs_url, headers=headers).json()
     open_bug_count = len(r)
     bug_comment_list = []
     if open_bug_count == 0:
-        message = "\t[bold green]There have been no bugs reported that are still open.[bold]"
+        message = "[green]There have been no bugs reported that are still open."
     else:
         for i in r:
             bug_create_date = datetime.strptime(i.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
@@ -66,9 +62,9 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
             message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
             message1 += "days to respond to the bug report"
             message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-            message = f"\t[bold red]{message1}\n\t{message2}[bold]"
+            message = f"[red]{message1}\n{message2}"
         else:
-            message = f"\t[bold red]There are {open_bug_count} bugs with no comments[bold]"
+            message = f"[red]There are {open_bug_count} bugs with no comments"
     return message
 
 
@@ -84,7 +80,9 @@ def _get_bug_comment_list(url: str, headers: dict) -> list:
 
 
 def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
-    print("5. Are there sufficient tests?")
+    """
+    5. Are there sufficient tests?
+    """
     test_list = _get_test_files(tree_url, headers=headers)
     total = len(test_list)
     test_files = 0
@@ -99,11 +97,11 @@ def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
             progress.update(test_file_reading_task, advance=1)
         progress.remove_task(test_file_reading_task)
     if test_files == 0:
-        message = "\t[bold red]There are 0 tests![bold]"
+        message = "[red]There are 0 tests!"
     else:
-        message = f"\t[bold green]There are {test_functions} tests in {test_files} files:[bold]\n"
+        message = f"[green]There are {test_functions} tests in {test_files} files:\n"
         for test in test_list:
-            message += f"\t\t- {test.get('path')}\n"
+            message += f"- {test.get('path')}\n"
     return message
 
 
@@ -111,97 +109,105 @@ def language_check(pypi_url: str) -> str:
     """
     6. Are the tests running with the latest Language version?
     """
-    print("6. Are the tests running with the latest Language version?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
     languages = [s.replace("Programming Language :: Python :: ", "Python ") for s in classifiers if "Programming Language" in s]
-    message = "\t[bold blue]The project supports the following programming languages[bold]\n"
+    message = "[blue]The project supports the following programming languages\n"
     for language in languages:
-        message += f"\t\t- {language}\n"
+        message += f"- {language}\n"
     return message
 
 
+# TODO: reqrite to list all frameworks as rich only shows IPython!
 def framework_check(pypi_url: str) -> str:
     """
     7. Are the tests running with the latest Integration version?
     """
-    print("7. Are the tests running with the latest Integration version?")
     response = requests.get(pypi_url).json()
     classifiers = response.get("info").get("classifiers")
     frameworks = [s.replace("Framework Django", "Framework").replace(" ::", "") for s in classifiers if "Framework" in s]
     if frameworks:
         framework = [s for s in classifiers if "Framework" in s][-1].replace(" :: ", " ")
-        message = f"\t[bold blue]The project supports the following framework as it's latest[bold] {framework}"
+        message = f"[blue]The project supports the following framework as it's latest[bold] {framework}"
     else:
-        message = "\t[bold blue]This project has no associated frameworks"
+        message = "[blue]This project has no associated frameworks"
     return message
 
 
 def ci_setup(workflows_url: str, headers: dict) -> str:
-    print("8. Is there a Continuous Integration (CI) configuration?")
+    """
+    8. Is there a Continuous Integration (CI) configuration?
+    """
     r = requests.get(workflows_url, headers=headers).json()
     if r.get("total_count") > 0:
-        message = f"[bold green]\tThere are {r.get('total_count')} workflows[bold]\n"
+        message = f"[green]There are {r.get('total_count')} workflows\n"
         for i in r.get("workflows"):
-            message += f"[bold blue]\t - {i.get('name')}\n[bold]"
+            message += f"[blue]- {i.get('name')}\n"
         return message
     else:
-        return "[bold red]There is no CI set up![bold]"
+        return "[red]There is no CI set up!"
 
 
 def ci_passing(ci_status_url: str, headers: dict) -> str:
-    print("[bold]9. Is the CI passing?")
+    """
+    9. Is the CI passing?
+    """
     r = requests.get(ci_status_url, headers=headers).json()
     conclusion = r.get("workflow_runs")[0].get("conclusion")
     if conclusion == "success":
-        return "\t[green]Yes"
+        return "[green]Yes"
     else:
-        return "\t[red]No"
+        return "[red]No"
 
 
 def well_used(api_url: str, headers: dict) -> str:
-    print("[bold]10. Does it seem relatively well used?")
-
+    """
+    10. Does it seem relatively well used?
+    """
     r = requests.get(api_url, headers=headers).json()
     watchers = r.get("watchers")
     network_count = r.get("network_count")
     open_issues = r.get("open_issues")
     subscribers_count = r.get("subscribers_count")
-    message = "\tThe project has the following statistics:\n"
-    message += f"\t- Watchers: {watchers}\n"
-    message += f"\t- Forks: {network_count}\n"
-    message += f"\t- Open Issues: {open_issues}\n"
-    message += f"\t- Subscribers: {subscribers_count}"
+    message = "The project has the following statistics:\n"
+    message += f"- Watchers: {watchers}\n"
+    message += f"- Forks: {network_count}\n"
+    message += f"- Open Issues: {open_issues}\n"
+    message += f"- Subscribers: {subscribers_count}"
     return message
 
 
 def commit_in_last_year(commits_url: str, headers: dict) -> str:
-    print("[bold]11. Has there been a commit in the last year?")
+    """
+    11. Has there been a commit in the last year?
+    """
     r = requests.get(commits_url, headers=headers).json()
     last_commit_date = r.get("commit").get("author").get("date")
     last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
     days_since_last_commit = (datetime.utcnow() - last_commit_date).days
     if days_since_last_commit > 365:
-        message = f"\t[red]No. The last commit was {days_since_last_commit} days ago"
+        message = f"[red]No. The last commit was {days_since_last_commit} days ago"
     else:
-        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} "
+        message = f"[green]Yes. The last commit was on {datetime.strftime(last_commit_date, '%m-%d-%Y')} "
         message += f"which was {days_since_last_commit} days ago"
 
     return message
 
 
 def release_in_last_year(pypi_api_url: str) -> str:
-    print("[bold]12. Has there been a release in the last year?")
-    r = requests.get(pypi_api_url).json()
-    releases = list(r.get("releases"))
-    most_recent_release = [s for s in releases if re.search(r"\d{1,2}\.\d{1,9}\.\d{1,9}", s)][-1]
-    last_release_date = r.get("releases").get(most_recent_release)[0].get("upload_time")
+    """
+    12. Has there been a release in the last year?
+    """
+    r = requests.get(pypi_api_url).json().get("releases")
+    releases = _get_release_date(r)
+    last_release_date = releases[0].upload_time
+    version = releases[0].version
     last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%S")
     days_since_last_release = (datetime.utcnow() - last_release_date).days
     if days_since_last_release > 365:
-        message = f"\t[red]No. The last commit was {days_since_last_release} days ago"
+        message = f"[red]No. Version {version} was last released {days_since_last_release} days ago"
     else:
-        message = f"\t[green]Yes. The last commit was on {datetime.strftime(last_release_date, '%m-%d-%Y')}"
+        message = f"[green]Yes. The last release was on {datetime.strftime(last_release_date, '%m-%d-%Y')}"
         message += f" which was {days_since_last_release} days ago"
 
     return message
@@ -230,3 +236,13 @@ def _get_test_files(url: str, headers: dict) -> list:
             test_file_list.append(i)
 
     return test_file_list
+
+
+def _get_release_date(release: dict) -> List:
+    Release = namedtuple("Release", "version, upload_time")
+    releases = []
+    for k, v in release.items():
+        if not re.search(r"[a-zA-Z]", k):
+            releases.append(Release(k, v[0].get("upload_time")))
+    releases = sorted(releases, key=attrgetter("upload_time"), reverse=True)
+    return releases

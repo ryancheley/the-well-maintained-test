@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 import click
 import requests
 from rich import print
+from rich.console import Console
+from rich.padding import Padding
 
 from .utils import (
     bug_responding,
@@ -20,6 +22,10 @@ from .utils import (
     release_in_last_year,
     well_used,
 )
+
+console = Console()
+question_style = "bold blue"
+answer_style = ""
 
 try:  # pragma: no cover
     with open("auth.json") as f:
@@ -87,6 +93,9 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     if url[-1] == "/":
         url = url.strip("/")
 
+    with open("questions.json") as f:
+        questions = json.load(f)
+
     parse_object = urlparse(url)
     author = parse_object.path.split("/")[-2]
     package = parse_object.path.split("/")[-1]
@@ -97,8 +106,6 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
         default_branch = branch
     changelog_url = f"https://raw.githubusercontent.com/{author}/{package}/{default_branch}/CHANGELOG.md"
     releases_url = f"https://www.github.com/{author}/{package}/releases"
-    # TODO: addition of /{default_branch} below will break the methods and the tests.
-    # Need to update as the return went from a [list] to a {dictionary}
     commits_url = f"https://api.github.com/repos/{author}/{package}/commits/{default_branch}"
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
@@ -108,29 +115,41 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     pypi_url = f"https://pypi.org/pypi/{package}/json"
     tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
 
-    print(production_ready_check(pypi_url))
+    console.print(questions.get("1"), style=question_style)
+    console.print(Padding(production_ready_check(pypi_url), (0, 4), style=answer_style))
 
-    print(documentation_exists(pypi_url))
+    console.print(questions.get("2"), style=question_style)
+    console.print(Padding(documentation_exists(pypi_url), (0, 4), style=answer_style))
 
-    print(change_log_check(changelog, release))
+    console.print(questions.get("3"), style=question_style)
+    console.print(Padding(change_log_check(changelog, release), (0, 4), style=answer_style))
 
-    print(bug_responding(bugs_url, headers))
+    console.print(questions.get("4"), style=question_style)
+    console.print(Padding(bug_responding(bugs_url, headers), (0, 4), style=answer_style))
 
-    print(check_tests(tree_url, headers, progress))
+    console.print(questions.get("5"), style=question_style)
+    console.print(Padding(check_tests(tree_url, headers, progress), (0, 4), style=answer_style))
 
-    print(language_check(pypi_url))
+    console.print(questions.get("6"), style=question_style)
+    console.print(Padding(language_check(pypi_url), (0, 4), style=answer_style))
 
-    print(framework_check(pypi_url))
+    console.print(questions.get("7"), style=question_style)
+    console.print(Padding(framework_check(pypi_url), (0, 4), style=answer_style))
 
-    print(ci_setup(workflows_url, headers))
+    console.print(questions.get("8"), style=question_style)
+    console.print(Padding(ci_setup(workflows_url, headers), (0, 4), style=answer_style))
 
-    print(ci_passing(ci_status_url, headers))
+    console.print(questions.get("9"), style=question_style)
+    console.print(Padding(ci_passing(ci_status_url, headers), (0, 4), style=answer_style))
 
-    print(well_used(api_url, headers))
+    console.print(questions.get("10"), style=question_style)
+    console.print(Padding(well_used(api_url, headers), (0, 4), style=answer_style))
 
-    print(commit_in_last_year(commits_url, headers))
+    console.print(questions.get("11"), style=question_style)
+    console.print(Padding(commit_in_last_year(commits_url, headers), (0, 4), style=answer_style))
 
-    print(release_in_last_year(pypi_url))
+    console.print(questions.get("12"), style=question_style)
+    console.print(Padding(release_in_last_year(pypi_url), (0, 4), style=answer_style))
 
 
 @cli.command()

@@ -41,6 +41,7 @@ from the_well_maintained_test.cli import cli
 from the_well_maintained_test.utils import (
     _get_bug_comment_list,
     _get_content,
+    _get_release_date,
     _get_test_files,
     _test_method_count,
     bug_responding,
@@ -349,7 +350,7 @@ def test_release_in_last_year_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = release_in_last_year(url)
-    expected = f"[red]No. The last release was {days} days ago"
+    expected = f"[red]No. Version 1.1.1 was last released {days} days ago"
     assert actual == expected
 
 
@@ -689,4 +690,31 @@ def test__get_test_files_no_blobs(monkeypatch):
     url = "https://fakeurl"
     actual = _get_test_files(url, headers)
     expected = []
+    assert actual == expected
+
+
+def test__get_release_date():
+    Release = namedtuple("Release", "version, upload_time")
+    release = {
+        "9.9.0": [
+            {
+                "upload_time": "2021-01-16T15:12:25",
+            }
+        ],
+        "10.14.0": [
+            {
+                "upload_time": "2021-10-16T15:12:25",
+            }
+        ],
+        "10.15.0a1": [
+            {
+                "upload_time": "2021-11-16T15:12:25",
+            }
+        ],
+    }
+    actual = _get_release_date(release)
+    expected = [
+        Release(version="10.14.0", upload_time="2021-10-16T15:12:25"),
+        Release(version="9.9.0", upload_time="2021-01-16T15:12:25"),
+    ]
     assert actual == expected
