@@ -69,10 +69,10 @@ def test_version():
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        [[200, 200], "[bold green]\tYes[bold]"],
-        [[404, 200], "[bold green]\tYes[bold]"],
-        [[200, 404], "[bold green]\tYes[bold]"],
-        [[404, 404], "[bold red]\tNo[bold]"],
+        [[200, 200], "[green]Yes"],
+        [[404, 200], "[green]Yes"],
+        [[200, 404], "[green]Yes"],
+        [[404, 404], "[red]No"],
     ],
 )
 def test_changelog(test_input, expected):
@@ -117,7 +117,7 @@ def test_bug_response_yes(monkeypatch):
     expected = bug_responding(url, headers=headers)
     message1 = f"The maintainer took {bug_turn_around_time_reply_days} days to respond to the bug report"
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
-    actual = f"\t[bold red]{message1}\n\t{message2}[bold]"
+    actual = f"[red]{message1}\n{message2}"
     assert expected == actual
 
 
@@ -158,7 +158,7 @@ def test_bug_response_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = bug_responding(url, headers=headers)
-    expected = "\t[bold green]There have been no bugs reported that are still open.[bold]"
+    expected = "[green]There have been no bugs reported that are still open."
     assert actual == expected
 
 
@@ -175,7 +175,7 @@ def test_bug_response_yes_no_response(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = bug_responding(url, headers=headers)
-    expected = "\t[bold red]There are 1 bugs with no comments[bold]"
+    expected = "[red]There are 1 bugs with no comments"
     assert actual == expected
 
 
@@ -192,7 +192,7 @@ def test_ci_setup_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_setup(url, headers=headers)
-    expected = "[bold green]\tThere are 1 workflows[bold]\n[bold blue]\t - Test\n[bold]"
+    expected = "[green]There are 1 workflows\n[blue]- Test\n"
     assert actual == expected
 
 
@@ -209,7 +209,7 @@ def test_ci_setup_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_setup(url, headers=headers)
-    expected = "[bold red]There is no CI set up![bold]"
+    expected = "[red]There is no CI set up!"
     assert actual == expected
 
 
@@ -226,7 +226,7 @@ def test_ci_passing_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_passing(url, headers=headers)
-    expected = "\t[green]Yes"
+    expected = "[green]Yes"
     assert actual == expected
 
 
@@ -243,7 +243,7 @@ def test_ci_passing_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = ci_passing(url, headers=headers)
-    expected = "\t[red]No"
+    expected = "[red]No"
     assert actual == expected
 
 
@@ -260,11 +260,11 @@ def test_well_used(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = well_used(url, headers=headers)
-    message = "\tThe project has the following statistics:\n"
-    message += "\t- Watchers: 5\n"
-    message += "\t- Forks: 6\n"
-    message += "\t- Open Issues: 6\n"
-    message += "\t- Subscribers: 10"
+    message = "The project has the following statistics:\n"
+    message += "- Watchers: 5\n"
+    message += "- Forks: 6\n"
+    message += "- Open Issues: 6\n"
+    message += "- Subscribers: 10"
 
     expected = message
     assert actual == expected
@@ -287,7 +287,7 @@ def test_commit_in_last_year_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = commit_in_last_year(url, headers=headers)
-    expected = f"\t[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
+    expected = f"[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
     assert actual == expected
 
 
@@ -308,7 +308,7 @@ def test_commit_in_last_year_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = commit_in_last_year(url, headers=headers)
-    expected = f"\t[red]No. The last commit was {days} days ago"
+    expected = f"[red]No. The last commit was {days} days ago"
     assert actual == expected
 
 
@@ -329,7 +329,7 @@ def test_release_in_last_year_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = release_in_last_year(url)
-    expected = f"\t[green]Yes. The last commit was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
+    expected = f"[green]Yes. The last release was on {datetime.strftime(test_date, '%m-%d-%Y')} which was {days} days ago"
     assert actual == expected
 
 
@@ -349,7 +349,7 @@ def test_release_in_last_year_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = release_in_last_year(url)
-    expected = f"\t[red]No. The last commit was {days} days ago"
+    expected = f"[red]No. The last release was {days} days ago"
     assert actual == expected
 
 
@@ -365,7 +365,7 @@ def test_production_ready_check_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = production_ready_check(url)
-    expected = "\t[bold green]The project is set to Development Status[bold] [blue]Alpha"
+    expected = "[green]The project is set to Development Status [underline]Alpha"
     assert actual == expected
 
 
@@ -381,7 +381,7 @@ def test_production_ready_check_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = production_ready_check(url)
-    expected = "\t[bold red]\tThere is no Development Status for this package. It is currently at version 0.5[bold]"
+    expected = "[red]There is no Development Status for this package. It is currently at version 0.5"
     assert actual == expected
 
 
@@ -397,7 +397,7 @@ def test_document_exists_yes(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = documentation_exists(url)
-    expected = "\t[bold green]Documentation can be found at https://fakeurl/blob/main/README.md[bold]"
+    expected = "[green]Documentation can be found at https://fakeurl/blob/main/README.md"
     assert actual == expected
 
 
@@ -413,7 +413,7 @@ def test_document_exists_no(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = documentation_exists(url)
-    expected = "\t[bold red]There is no documentation for this project[bold]"
+    expected = "[red]There is no documentation for this project"
     assert actual == expected
 
 
@@ -429,7 +429,7 @@ def test_language_check(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = language_check(url)
-    expected = "\t[bold blue]The project supports the following programming languages[bold]\n\t\t- Python 3.6\n\t\t- Python 3.7\n"
+    expected = "[blue]The project supports the following programming languages\n- Python 3.6\n- Python 3.7\n"
     assert actual == expected
 
 
@@ -445,7 +445,7 @@ def test_framework_check_exists(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = "\t[bold blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
+    expected = "[blue]The project supports the following framework as it's latest[bold] Framework Django 3.2"
     assert actual == expected
 
 
@@ -461,7 +461,7 @@ def test_framework_check_does_not_exist(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = framework_check(url)
-    expected = "\t[bold blue]This project has no associated frameworks"
+    expected = "[blue]This project has no associated frameworks"
     assert actual == expected
 
 
@@ -542,7 +542,7 @@ cnQhWy9ib2xkIHJlZF1cbiIK
     monkeypatch.setattr("the_well_maintained_test.utils._get_content", mock__get_content)
     url = "https://fakeurl"
     actual = check_tests(url, headers=headers, show_progress=True)
-    expected = "\t[bold green]There are 8 tests in 1 files:[bold]\n\t\t- tests/admin_changelist/test_date_hierarchy.py\n"
+    expected = "[green]There are 8 tests in 1 files:\n- tests/admin_changelist/test_date_hierarchy.py\n"
     assert actual == expected
 
 
@@ -559,7 +559,7 @@ def test_check_tests_do_not_exist(monkeypatch):
     monkeypatch.setattr(requests, "get", mock_get)
     url = "https://fakeurl"
     actual = check_tests(url, headers=headers, show_progress=True)
-    expected = "\t[bold red]There are 0 tests![bold]"
+    expected = "[red]There are 0 tests!"
     assert actual == expected
 
 
