@@ -77,4 +77,18 @@ Now install the dependencies and test dependencies:
 
 To run the tests:
 
-    pytest
+    just test
+
+To run `mypy` command you'll need to run
+
+    mypy --install-types
+
+Then, to run mypy:
+
+    just mypy
+
+You can also do a pre-commit check on the files by running
+
+    just check
+
+This will run several pre-commit hooks, but before that it will run `mypy`
