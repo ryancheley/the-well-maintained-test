@@ -3,7 +3,9 @@ import re
 from collections import namedtuple
 from datetime import datetime
 from operator import attrgetter
+from pathlib import Path
 from typing import List
+from urllib.parse import urlparse
 
 import requests
 
@@ -49,7 +51,10 @@ def _get_release_date(release: dict) -> List:
     releases = []
     for k, v in release.items():
         if not re.search(r"[a-zA-Z]", k):
-            releases.append(Release(k, v[0].get("upload_time")))
+            try:
+                releases.append(Release(k, v[0].get("upload_time")))
+            except IndexError:
+                pass
     releases = sorted(releases, key=attrgetter("upload_time"), reverse=True)
     return releases
 
@@ -60,3 +65,17 @@ def _check_verb_agreement(count: int) -> str:
     else:
         verb = "are"
     return verb
+
+
+def _get_requirements_txt_file(requirements_file: Path) -> List:
+    with open(requirements_file) as f:
+        requirements = f.readlines()
+    packages = [s.replace("\n", "").replace("==", " ").split(" ")[0] for s in requirements]
+    package_urls = []
+    for package in packages:
+        url = f"https://pypi.org/pypi/{package}/json"
+        project_urls = requests.get(url).json().get("info").get("project_urls")
+        for k, v in project_urls.items():
+            if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
+                package_urls.append((package, v))
+    return sorted(package_urls, key=lambda x: x[0].lower())

@@ -1,6 +1,7 @@
 import importlib.resources
 import json
 import pathlib
+from os import system
 from urllib.parse import urlparse
 
 import click
@@ -8,6 +9,8 @@ import requests
 from rich.console import Console
 from rich.padding import Padding
 from rich.prompt import Prompt
+
+from the_well_maintained_test.helpers import _get_requirements_txt_file
 
 from .utils import (
     bug_responding,
@@ -185,3 +188,32 @@ def questions(question: str) -> None:  # pragma: no cover
     else:
         for _, v in questions.items():
             console.print(v, style=question_style)
+
+
+@cli.command()
+@click.option(
+    "-r",
+    "--requirements-file",
+    type=click.Path(exists=True),
+    help="List of questions that are tested",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["html", "txt"]),
+    help="Show progress on test check",
+)
+def requirements(requirements_file, output):  # pragma: no cover
+    packages = _get_requirements_txt_file(requirements_file)
+    packages = packages
+    for package in packages:
+        console.rule(f"[bold blue] {package[0]}")
+        cmd = f"the-well-maintained-test url '{package[1]}'"
+        system(cmd)
+        if output == "html":
+            console.save_html(
+                f"output_{package[0].lower()}.html",
+            )
+
+        if output == "txt":
+            console.save_text(f"output_{package[0].lower()}.txt")

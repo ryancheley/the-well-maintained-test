@@ -19,6 +19,13 @@ class MockResponseCIPassing:
         return {"workflow_runs": [{"conclusion": "success"}]}
 
 
+class MockResponseCINoConclusion:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {"workflow_runs": []}
+
+
 class MockResponseCIFailing:
     # mock json() method always returns a specific testing dictionary
     @staticmethod

@@ -16,6 +16,7 @@ from tests.test_classes import (
     MockResponseBugsWithNoResponse,
     MockResponseBugsYes,
     MockResponseCIFailing,
+    MockResponseCINoConclusion,
     MockResponseCIPassing,
     MockResponseCISetUpNo,
     MockResponseCISetUpYes,
@@ -38,7 +39,10 @@ from tests.test_classes import (
     MockResponseWellUsed,
 )
 from the_well_maintained_test.cli import cli
-from the_well_maintained_test.helpers import _check_verb_agreement
+from the_well_maintained_test.helpers import (
+    _check_verb_agreement,
+    _get_requirements_txt_file,
+)
 from the_well_maintained_test.utils import (
     _get_bug_comment_list,
     _get_content,
@@ -229,6 +233,23 @@ def test_ci_passing_yes(monkeypatch):
     url = "https://fakeurl"
     actual = ci_passing(url, headers=headers)
     expected = "[green]Yes"
+    assert actual == expected
+
+
+def test_ci_passing_no_conclusion(monkeypatch):
+    """
+    9. Is the CI passing?
+    """
+    headers = {}
+
+    def mock_get(*args, **kwargs):
+        return MockResponseCINoConclusion()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = ci_passing(url, headers=headers)
+    expected = "[red]No"
     assert actual == expected
 
 
@@ -722,6 +743,15 @@ def test__get_release_date():
     assert actual == expected
 
 
+def test__get_release_date_missing():
+    release = {
+        "9.9.0": [],
+    }
+    actual = _get_release_date(release)
+    expected = []
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "test_input,expected",
     [
@@ -733,3 +763,16 @@ def test__get_release_date():
 )
 def test__check_verb_agreement(test_input, expected):
     assert _check_verb_agreement(test_input) == expected
+
+
+def test__get_requirements_txt_file():
+    actual = _get_requirements_txt_file("requirements.txt")
+    expected = [
+        ("Django", "https://github.com/django/django"),
+        ("django-environ", "https://github.com/joke2k/django-environ"),
+        ("django-permissions-policy", "https://github.com/adamchainz/django-permissions-policy"),
+        ("gunicorn", "https://github.com/benoitc/gunicorn"),
+        ("MLB-StatsAPI", "https://github.com/toddrob99/MLB-StatsAPI"),
+        ("requests", "https://github.com/psf/requests"),
+    ]
+    assert actual == expected
