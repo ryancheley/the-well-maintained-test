@@ -1,3 +1,4 @@
+import importlib.resources
 import json
 import pathlib
 from urllib.parse import urlparse
@@ -95,20 +96,8 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     if url[-1] == "/":
         url = url.strip("/")
 
-    questions = {
-        "1": "1. Is it described as “production ready”?",
-        "2": "2. Is there sufficient documentation?",
-        "3": "3. Is there a changelog?",
-        "4": "4. Is someone responding to bug reports?",
-        "5": "5. Are there sufficient tests?",
-        "6": "6. Are the tests running with the latest <Language> version?",
-        "7": "7. Are the tests running with the latest <Integration> version?",
-        "8": "8. Is there a Continuous Integration (CI) configuration?",
-        "9": "9. Is the CI passing?",
-        "10": "10. Does it seem relatively well used?",
-        "11": "11. Has there been a commit in the last year?",
-        "12": "12. Has there been a release in the last year?",
-    }
+    with importlib.resources.open_text("the_well_maintained_test.data", "questions.json") as file:
+        questions = json.load(file)
 
     parse_object = urlparse(url)
     author = parse_object.path.split("/")[-2]
@@ -176,20 +165,9 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
 )
 def questions(question: str) -> None:  # pragma: no cover
     "List of questions tested"
-    questions = {
-        "1": "1. Is it described as “production ready”?",
-        "2": "2. Is there sufficient documentation?",
-        "3": "3. Is there a changelog?",
-        "4": "4. Is someone responding to bug reports?",
-        "5": "5. Are there sufficient tests?",
-        "6": "6. Are the tests running with the latest <Language> version?",
-        "7": "7. Are the tests running with the latest <Integration> version?",
-        "8": "8. Is there a Continuous Integration (CI) configuration?",
-        "9": "9. Is the CI passing?",
-        "10": "10. Does it seem relatively well used?",
-        "11": "11. Has there been a commit in the last year?",
-        "12": "12. Has there been a release in the last year?",
-    }
+    with importlib.resources.open_text("the_well_maintained_test.data", "questions.json") as file:
+        questions = json.load(file)
+
     if question != "all":
         console.print(questions.get(question), style=question_style)
     else:

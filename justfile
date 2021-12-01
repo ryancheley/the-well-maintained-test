@@ -1,7 +1,6 @@
 # run tests via pytest, creates coverage report, and then opens it up
 test:
     coverage run -m pytest 
-    coverage html --omit=the_well_maintained_test/cli.py--omit=the_well_maintained_test/cli.py
     open htmlcov/index.html
 
 # runs the pre-commit check command
@@ -23,4 +22,4 @@ gitclean:
 
 # run mypy on the files
 mypy: 
-    mypy the_well_maintained_test/*.py --no-strict-optional
+    mypy src/the_well_maintained_test/*.py --no-strict-optional

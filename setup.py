@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-VERSION = "0.5.1"
+VERSION = "0.6.0"
 
 
 def get_long_description():
@@ -30,10 +30,12 @@ setup(
     license="Apache License, Version 2.0",
     version=VERSION,
     packages=["the_well_maintained_test"],
+    package_dir={"": "src"},
     entry_points="""
         [console_scripts]
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
+    package_data={"the_well_maintained_test": ["data/*.json"]},
     install_requires=["click", "requests", "rich"],
     extras_require={"test": ["pytest", "black", "isort"]},
     python_requires=">=3.7",
