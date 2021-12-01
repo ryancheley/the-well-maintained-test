@@ -91,7 +91,13 @@ def auth(auth: str) -> None:  # pragma: no cover
     default=True,
     help="Show progress on test check",
 )
-def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["html", "txt"]),
+    help="Show progress on test check",
+)
+def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
     "url to a github repository you'd like to check"
     if url[-1] == "/":
         url = url.strip("/")
@@ -153,6 +159,12 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
 
     console.print(questions.get("12"), style=question_style)
     console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
+
+    if output == "html":
+        console.save_html("output.html")
+
+    if output == "txt":
+        console.save_text("output.txt")
 
 
 @cli.command()
