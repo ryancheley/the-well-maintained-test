@@ -37,7 +37,7 @@ setup(
     """,
     package_data={"the_well_maintained_test": ["data/*.json"]},
     install_requires=["click", "requests", "rich"],
-    extras_require={"test": ["pytest", "black", "isort"]},
+    extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy"]},
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 4 - Beta",
