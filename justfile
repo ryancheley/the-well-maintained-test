@@ -1,6 +1,7 @@
 # run tests via pytest, creates coverage report, and then opens it up
 test:
     coverage run -m pytest 
+    coverage html --omit=src/the_well_maintained_test/cli.py--omit=src/the_well_maintained_test/cli.py
     open htmlcov/index.html
 
 # runs the pre-commit check command
