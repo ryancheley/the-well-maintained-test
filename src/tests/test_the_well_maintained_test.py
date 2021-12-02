@@ -31,6 +31,7 @@ from tests.test_classes import (
     MockResponseLanguageCheck,
     MockResponseProductionReadyNo,
     MockResponseProductionReadyYes,
+    MockResponseProjectURLs,
     MockResponseReleasesNo,
     MockResponseReleasesYes,
     MockResponseTestFilesDoNotExist,
@@ -765,14 +766,16 @@ def test__check_verb_agreement(test_input, expected):
     assert _check_verb_agreement(test_input) == expected
 
 
-def test__get_requirements_txt_file():
-    actual = _get_requirements_txt_file("requirements.txt")
+def test__get_requirements_txt_file(tmpdir, monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseProjectURLs()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+
+    p = tmpdir.mkdir("sub").join("requirements.txt")
+    p.write("Django==3.2.9")
+    actual = _get_requirements_txt_file(p)
     expected = [
         ("Django", "https://github.com/django/django"),
-        ("django-environ", "https://github.com/joke2k/django-environ"),
-        ("django-permissions-policy", "https://github.com/adamchainz/django-permissions-policy"),
-        ("gunicorn", "https://github.com/benoitc/gunicorn"),
-        ("MLB-StatsAPI", "https://github.com/toddrob99/MLB-StatsAPI"),
-        ("requests", "https://github.com/psf/requests"),
     ]
     assert actual == expected

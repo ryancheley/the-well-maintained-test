@@ -342,3 +342,21 @@ class MockResponseTestFilesNoBlobs:
     @staticmethod
     def json():
         return {"tree": [{"type": "tree"}]}
+
+
+class MockResponseProjectURLs:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    "Documentation": "https://docs.djangoproject.com/",
+                    "Funding": "https://www.djangoproject.com/fundraising/",
+                    "Homepage": "https://www.djangoproject.com/",
+                    "Release notes": "https://docs.djangoproject.com/en/stable/releases/",
+                    "Source": "https://github.com/django/django",
+                    "Tracker": "https://code.djangoproject.com/",
+                }
+            }
+        }
