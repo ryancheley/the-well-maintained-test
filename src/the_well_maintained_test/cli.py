@@ -1,12 +1,16 @@
 import json
-import pathlib
+from os import system
+from pathlib import Path
 from urllib.parse import urlparse
 
 import click
+import pkg_resources
 import requests
 from rich.console import Console
 from rich.padding import Padding
 from rich.prompt import Prompt
+
+from the_well_maintained_test.helpers import _get_requirements_txt_file
 
 from .utils import (
     bug_responding,
@@ -63,7 +67,7 @@ def auth(auth: str) -> None:  # pragma: no cover
     "Save authentication credentials to a JSON file"
     console.print("Create a GitHub personal user token and paste it here:")
     personal_token = Prompt.ask("Personal token")
-    if pathlib.Path(auth).exists():
+    if Path(auth).exists():
         auth_data = json.load(open(auth))
     else:
         auth_data = {}
@@ -90,25 +94,19 @@ def auth(auth: str) -> None:  # pragma: no cover
     default=True,
     help="Show progress on test check",
 )
-def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["html", "txt"]),
+    help="Show progress on test check",
+)
+def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
     "url to a github repository you'd like to check"
     if url[-1] == "/":
         url = url.strip("/")
 
-    questions = {
-        "1": "1. Is it described as “production ready”?",
-        "2": "2. Is there sufficient documentation?",
-        "3": "3. Is there a changelog?",
-        "4": "4. Is someone responding to bug reports?",
-        "5": "5. Are there sufficient tests?",
-        "6": "6. Are the tests running with the latest <Language> version?",
-        "7": "7. Are the tests running with the latest <Integration> version?",
-        "8": "8. Is there a Continuous Integration (CI) configuration?",
-        "9": "9. Is the CI passing?",
-        "10": "10. Does it seem relatively well used?",
-        "11": "11. Has there been a commit in the last year?",
-        "12": "12. Has there been a release in the last year?",
-    }
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
+        questions = json.load(file)
 
     parse_object = urlparse(url)
     author = parse_object.path.split("/")[-2]
@@ -165,6 +163,12 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     console.print(questions.get("12"), style=question_style)
     console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
 
+    if output == "html":
+        console.save_html("output.html")
+
+    if output == "txt":
+        console.save_text("output.txt")
+
 
 @cli.command()
 @click.option(
@@ -176,22 +180,41 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
 )
 def questions(question: str) -> None:  # pragma: no cover
     "List of questions tested"
-    questions = {
-        "1": "1. Is it described as “production ready”?",
-        "2": "2. Is there sufficient documentation?",
-        "3": "3. Is there a changelog?",
-        "4": "4. Is someone responding to bug reports?",
-        "5": "5. Are there sufficient tests?",
-        "6": "6. Are the tests running with the latest <Language> version?",
-        "7": "7. Are the tests running with the latest <Integration> version?",
-        "8": "8. Is there a Continuous Integration (CI) configuration?",
-        "9": "9. Is the CI passing?",
-        "10": "10. Does it seem relatively well used?",
-        "11": "11. Has there been a commit in the last year?",
-        "12": "12. Has there been a release in the last year?",
-    }
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
+        questions = json.load(file)
+
     if question != "all":
         console.print(questions.get(question), style=question_style)
     else:
         for _, v in questions.items():
             console.print(v, style=question_style)
+
+
+@cli.command()
+@click.option(
+    "-r",
+    "--requirements-file",
+    type=click.Path(exists=True),
+    help="List of questions that are tested",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["html", "txt"]),
+    help="Show progress on test check",
+)
+def requirements(requirements_file, output):  # pragma: no cover
+    "Loop over a requirements.txt file"
+    packages = _get_requirements_txt_file(requirements_file)
+    packages = packages
+    for package in packages:
+        console.rule(f"[bold blue] {package[0]}")
+        cmd = f"the-well-maintained-test url '{package[1]}'"
+        system(cmd)
+        if output == "html":
+            console.save_html(
+                f"output_{package[0].lower()}.html",
+            )
+
+        if output == "txt":
+            console.save_text(f"output_{package[0].lower()}.txt")

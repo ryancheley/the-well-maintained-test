@@ -9,3 +9,7 @@ venv
 .DS_Store
 .coverage
 auth.json
+
+# ignore the output files generated
+output.html
+output.txt

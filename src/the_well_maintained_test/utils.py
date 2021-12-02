@@ -156,7 +156,11 @@ def ci_passing(ci_status_url: str, headers: dict) -> str:
     9. Is the CI passing?
     """
     r = requests.get(ci_status_url, headers=headers).json()
-    conclusion = r.get("workflow_runs")[0].get("conclusion")
+    conclusion = None
+    try:
+        conclusion = r.get("workflow_runs")[0].get("conclusion")
+    except IndexError:
+        pass
     if conclusion == "success":
         return "[green]Yes"
     else:
