@@ -204,6 +204,7 @@ def questions(question: str) -> None:  # pragma: no cover
     help="Show progress on test check",
 )
 def requirements(requirements_file, output):  # pragma: no cover
+    "Loop over a requirements.txt file"
     packages = _get_requirements_txt_file(requirements_file)
     packages = packages
     for package in packages:
