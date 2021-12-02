@@ -1,9 +1,9 @@
-import importlib.resources
 import json
-import pathlib
+from pathlib import Path
 from urllib.parse import urlparse
 
 import click
+import pkg_resources
 import requests
 from rich.console import Console
 from rich.padding import Padding
@@ -64,7 +64,7 @@ def auth(auth: str) -> None:  # pragma: no cover
     "Save authentication credentials to a JSON file"
     console.print("Create a GitHub personal user token and paste it here:")
     personal_token = Prompt.ask("Personal token")
-    if pathlib.Path(auth).exists():
+    if Path(auth).exists():
         auth_data = json.load(open(auth))
     else:
         auth_data = {}
@@ -96,7 +96,7 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
     if url[-1] == "/":
         url = url.strip("/")
 
-    with importlib.resources.open_text("the_well_maintained_test.data", "questions.json") as file:
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
         questions = json.load(file)
 
     parse_object = urlparse(url)
@@ -165,7 +165,7 @@ def url(url: str, branch: str, progress: bool) -> None:  # pragma: no cover
 )
 def questions(question: str) -> None:  # pragma: no cover
     "List of questions tested"
-    with importlib.resources.open_text("the_well_maintained_test.data", "questions.json") as file:
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
         questions = json.load(file)
 
     if question != "all":
