@@ -41,9 +41,10 @@ This will create a file called auth.json in your current directory containing th
     --help     Show this message and exit.
 
     Commands:
-    auth       Save authentication credentials to a JSON file
-    questions  List of questions tested
-    url        url to a github repository you'd like to check
+    auth            Save authentication credentials to a JSON file
+    questions       List of questions tested
+    requirements    Loop over a requirements.txt file
+    url             url to a github repository you'd like to check
 
 
     URL is a url to a github repository you'd like to check, for example:
