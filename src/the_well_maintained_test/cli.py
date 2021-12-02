@@ -21,6 +21,7 @@ from .utils import (
     commit_in_last_year,
     documentation_exists,
     framework_check,
+    get_github_api_rate_limits,
     language_check,
     production_ready_check,
     release_in_last_year,
@@ -218,3 +219,20 @@ def requirements(requirements_file, output):  # pragma: no cover
 
         if output == "txt":
             console.save_text(f"output_{package[0].lower()}.txt")
+
+
+@cli.command()
+@click.option(
+    "-r",
+    "--resource",
+    type=click.Choice(["code_scanning_upload", "core", "graphql", "integration_manifest", "search"]),
+    default="core",
+    show_default=True,
+    help="Show progress on test check",
+)
+def check(resource):  # pragma: no cover
+    """
+    Check your GitHub API Usage Stats.
+    """
+    message = get_github_api_rate_limits(headers, resource)
+    console.print(Padding(message, answer_padding_style, style=answer_style))

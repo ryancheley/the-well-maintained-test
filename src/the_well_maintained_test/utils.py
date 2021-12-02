@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from operator import attrgetter
+from time import localtime, strftime
 
 import requests
 from rich.progress import Progress
@@ -217,4 +218,18 @@ def release_in_last_year(pypi_api_url: str) -> str:
         message = f"[green]Yes. The last release was on {datetime.strftime(last_release_date, '%m-%d-%Y')}"
         message += f" which was {days_since_last_release} days ago"
 
+    return message
+
+
+def get_github_api_rate_limits(headers, resource):
+    url = "https://api.github.com/rate_limit"
+    response = requests.get(url, headers=headers).json()
+    core = response.get("resources").get(resource)
+    limit = core.get("limit")
+    used = core.get("used")
+    remaining = core.get("remaining")
+    reset = strftime("%Y-%m-%d %H:%M:%S", localtime(core.get("reset")))
+    message = f"You have used {used} out of {limit} calls.\n\n"
+    message += f"You have {remaining} calls remaining.\n\n"
+    message += f"Your limit will reset at {reset}."
     return message

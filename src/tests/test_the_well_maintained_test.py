@@ -28,6 +28,7 @@ from tests.test_classes import (
     MockResponseDocumentationNo,
     MockResponseDocumentationYes,
     MockResponseFrameworkCheck,
+    MockResponseGitHubRateLimit,
     MockResponseLanguageCheck,
     MockResponseProductionReadyNo,
     MockResponseProductionReadyYes,
@@ -58,6 +59,7 @@ from the_well_maintained_test.utils import (
     commit_in_last_year,
     documentation_exists,
     framework_check,
+    get_github_api_rate_limits,
     language_check,
     production_ready_check,
     release_in_last_year,
@@ -778,4 +780,21 @@ def test__get_requirements_txt_file(tmpdir, monkeypatch):
     expected = [
         ("Django", "https://github.com/django/django"),
     ]
+    assert actual == expected
+
+
+def test_get_github_api_rate_limits(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseGitHubRateLimit()
+
+    resource = "core"
+    headers = {}
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    actual = get_github_api_rate_limits(headers, resource)
+    message = "You have used 1 out of 5000 calls.\n\n"
+    message += "You have 4999 calls remaining.\n\n"
+    message += "Your limit will reset at 2013-07-01 10:47:53."
+
+    expected = message
     assert actual == expected
