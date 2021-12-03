@@ -1,5 +1,6 @@
 from collections import namedtuple
 from datetime import date, datetime
+from time import localtime, strftime
 
 import pytest
 import requests
@@ -28,6 +29,7 @@ from tests.test_classes import (
     MockResponseDocumentationNo,
     MockResponseDocumentationYes,
     MockResponseFrameworkCheck,
+    MockResponseGitHubRateLimit,
     MockResponseLanguageCheck,
     MockResponseProductionReadyNo,
     MockResponseProductionReadyYes,
@@ -38,6 +40,8 @@ from tests.test_classes import (
     MockResponseTestFilesExist,
     MockResponseTestFilesNoBlobs,
     MockResponseWellUsed,
+    MockResponseWithoutVulnerabilities,
+    MockResponseWithVulnerabilities,
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.helpers import (
@@ -58,6 +62,8 @@ from the_well_maintained_test.utils import (
     commit_in_last_year,
     documentation_exists,
     framework_check,
+    get_github_api_rate_limits,
+    get_vulnerabilities,
     language_check,
     production_ready_check,
     release_in_last_year,
@@ -688,7 +694,11 @@ def test__get_test_files_exist(monkeypatch):
         {
             "type": "blob",
             "path": "tests/test_management.py",
-        }
+        },
+        {
+            "path": "friendship/tests/tests.py",
+            "type": "blob",
+        },
     ]
     assert actual == expected
 
@@ -778,4 +788,44 @@ def test__get_requirements_txt_file(tmpdir, monkeypatch):
     expected = [
         ("Django", "https://github.com/django/django"),
     ]
+    assert actual == expected
+
+
+def test_get_github_api_rate_limits(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseGitHubRateLimit()
+
+    resource = "core"
+    headers = {}
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    reset_date = strftime("%Y-%m-%d %H:%M:%S", localtime(1372700873))
+    actual = get_github_api_rate_limits(headers, resource)
+    message = "You have used 1 out of 5000 calls.\n\n"
+    message += "You have 4999 calls remaining.\n\n"
+    message += f"Your limit will reset at {reset_date}."
+
+    expected = message
+    assert actual == expected
+
+
+def test_get_vulnerabilities_yes(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseWithVulnerabilities()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = get_vulnerabilities(url)
+    expected = 3
+    assert actual == expected
+
+
+def test_get_vulnerabilities_no(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseWithoutVulnerabilities()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = get_vulnerabilities(url)
+    expected = 0
     assert actual == expected

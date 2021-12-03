@@ -21,6 +21,8 @@ from .utils import (
     commit_in_last_year,
     documentation_exists,
     framework_check,
+    get_github_api_rate_limits,
+    get_vulnerabilities,
     language_check,
     production_ready_check,
     release_in_last_year,
@@ -32,6 +34,7 @@ question_style = "bold blue"
 answer_style = "italic"
 answer_padding_style = (1, 0, 1, 4)
 special_answer_padding_style = (0, 0, 0, 4)
+warning_style = "bold red"
 
 try:  # pragma: no cover
     with open("auth.json") as f:
@@ -127,6 +130,14 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     pypi_url = f"https://pypi.org/pypi/{package}/json"
     tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
 
+    vulnerabilities = get_vulnerabilities(pypi_url)
+    if vulnerabilities > 0:
+        console.rule("[bold red]Vulnerabilities detected!!!")
+        console.print(
+            Padding(f"There are {vulnerabilities} vulnerabilities in this package", answer_padding_style, style=warning_style)
+        )
+        console.rule()
+
     console.print(questions.get("1"), style=question_style)
     console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
 
@@ -218,3 +229,20 @@ def requirements(requirements_file, output):  # pragma: no cover
 
         if output == "txt":
             console.save_text(f"output_{package[0].lower()}.txt")
+
+
+@cli.command()
+@click.option(
+    "-r",
+    "--resource",
+    type=click.Choice(["code_scanning_upload", "core", "graphql", "integration_manifest", "search"]),
+    default="core",
+    show_default=True,
+    help="Show progress on test check",
+)
+def check(resource):  # pragma: no cover
+    """
+    Check your GitHub API Usage Stats.
+    """
+    message = get_github_api_rate_limits(headers, resource)
+    console.print(Padding(message, answer_padding_style, style=answer_style))

@@ -320,7 +320,11 @@ class MockResponseTestFilesExist:
                 {
                     "type": "blob",
                     "path": "tests/test_management.py",
-                }
+                },
+                {
+                    "path": "friendship/tests/tests.py",
+                    "type": "blob",
+                },
             ]
         }
 
@@ -360,3 +364,60 @@ class MockResponseProjectURLs:
                 }
             }
         }
+
+
+class MockResponseGitHubRateLimit:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "resources": {
+                "core": {"limit": 5000, "remaining": 4999, "reset": 1372700873, "used": 1},
+                "search": {"limit": 30, "remaining": 18, "reset": 1372697452, "used": 12},
+                "graphql": {"limit": 5000, "remaining": 4993, "reset": 1372700389, "used": 7},
+                "integration_manifest": {"limit": 5000, "remaining": 4999, "reset": 1551806725, "used": 1},
+                "code_scanning_upload": {"limit": 500, "remaining": 499, "reset": 1551806725, "used": 1},
+            },
+            "rate": {"limit": 5000, "remaining": 4999, "reset": 1372700873, "used": 1},
+        }
+
+
+class MockResponseWithVulnerabilities:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "vulnerabilities": [
+                {
+                    "aliases": ["CVE-2014-0472"],
+                    "details": "details",
+                    "fixed_in": ["1.4.11", "1.5.6", "1.6.3"],
+                    "id": "PYSEC-2014-1",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2014-1",
+                    "source": "osv",
+                },
+                {
+                    "aliases": ["CVE-2011-4136"],
+                    "details": "details",
+                    "fixed_in": ["1.2.7", "1.3.1"],
+                    "id": "PYSEC-2011-1",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2011-1",
+                    "source": "osv",
+                },
+                {
+                    "aliases": ["CVE-2011-4140"],
+                    "details": "details",
+                    "fixed_in": ["1.2.7", "1.3.1"],
+                    "id": "PYSEC-2011-5",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2011-5",
+                    "source": "osv",
+                },
+            ]
+        }
+
+
+class MockResponseWithoutVulnerabilities:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {"vulnerabilities": []}

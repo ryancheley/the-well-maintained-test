@@ -7,6 +7,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![Imports: flake8](https://img.shields.io/badge/%20imports-flake8-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/flake8/)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/ryancheley/the-well-maintained-test/main.svg)](https://results.pre-commit.ci/latest/github/ryancheley/the-well-maintained-test/main)
+
 
 
 Programatically tries to answer the 12 questions from Adam Johnson's [blog post](https://adamj.eu/tech/2021/11/04/the-well-maintained-test/)
@@ -31,7 +33,7 @@ This will create a file called auth.json in your current directory containing th
 
     Usage: the-well-maintained-test [OPTIONS] COMMAND [ARGS]...
 
-    Programatically tries to answer the 12 questions from         Adam Johnson's
+    Programatically tries to answer the 12 questions from Adam Johnson's 
     blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/ URL is
     a url to a github repository you'd like to check, for example:     the-well-
     maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
