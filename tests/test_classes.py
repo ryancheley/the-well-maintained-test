@@ -376,3 +376,44 @@ class MockResponseGitHubRateLimit:
             },
             "rate": {"limit": 5000, "remaining": 4999, "reset": 1372700873, "used": 1},
         }
+
+
+class MockResponseWithVulnerabilities:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "vulnerabilities": [
+                {
+                    "aliases": ["CVE-2014-0472"],
+                    "details": "details",
+                    "fixed_in": ["1.4.11", "1.5.6", "1.6.3"],
+                    "id": "PYSEC-2014-1",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2014-1",
+                    "source": "osv",
+                },
+                {
+                    "aliases": ["CVE-2011-4136"],
+                    "details": "details",
+                    "fixed_in": ["1.2.7", "1.3.1"],
+                    "id": "PYSEC-2011-1",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2011-1",
+                    "source": "osv",
+                },
+                {
+                    "aliases": ["CVE-2011-4140"],
+                    "details": "details",
+                    "fixed_in": ["1.2.7", "1.3.1"],
+                    "id": "PYSEC-2011-5",
+                    "link": "https://osv.dev/vulnerability/PYSEC-2011-5",
+                    "source": "osv",
+                },
+            ]
+        }
+
+
+class MockResponseWithoutVulnerabilities:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {"vulnerabilities": []}

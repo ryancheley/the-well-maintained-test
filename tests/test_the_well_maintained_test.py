@@ -39,6 +39,8 @@ from tests.test_classes import (
     MockResponseTestFilesExist,
     MockResponseTestFilesNoBlobs,
     MockResponseWellUsed,
+    MockResponseWithoutVulnerabilities,
+    MockResponseWithVulnerabilities,
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.helpers import (
@@ -60,6 +62,7 @@ from the_well_maintained_test.utils import (
     documentation_exists,
     framework_check,
     get_github_api_rate_limits,
+    get_vulnerabilities,
     language_check,
     production_ready_check,
     release_in_last_year,
@@ -797,4 +800,26 @@ def test_get_github_api_rate_limits(monkeypatch):
     message += "Your limit will reset at 2013-07-01 10:47:53."
 
     expected = message
+    assert actual == expected
+
+
+def test_get_vulnerabilities_yes(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseWithVulnerabilities()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = get_vulnerabilities(url)
+    expected = 3
+    assert actual == expected
+
+
+def test_get_vulnerabilities_no(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseWithoutVulnerabilities()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = get_vulnerabilities(url)
+    expected = 0
     assert actual == expected

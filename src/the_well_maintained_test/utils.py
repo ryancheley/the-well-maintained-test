@@ -233,3 +233,10 @@ def get_github_api_rate_limits(headers, resource):
     message += f"You have {remaining} calls remaining.\n\n"
     message += f"Your limit will reset at {reset}."
     return message
+
+
+def get_vulnerabilities(url: str) -> int:
+    url = url
+    vulnerabilities = requests.get(url).json().get("vulnerabilities")
+    vulnerability_count = len(vulnerabilities)
+    return vulnerability_count
