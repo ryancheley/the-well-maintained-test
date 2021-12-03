@@ -1,5 +1,6 @@
 from collections import namedtuple
 from datetime import date, datetime
+from time import localtime, strftime
 
 import pytest
 import requests
@@ -798,10 +799,11 @@ def test_get_github_api_rate_limits(monkeypatch):
     headers = {}
 
     monkeypatch.setattr(requests, "get", mock_get)
+    reset_date = strftime("%Y-%m-%d %H:%M:%S", localtime(1372700873))
     actual = get_github_api_rate_limits(headers, resource)
     message = "You have used 1 out of 5000 calls.\n\n"
     message += "You have 4999 calls remaining.\n\n"
-    message += "Your limit will reset at 2013-07-01 10:47:53."
+    message += f"Your limit will reset at {reset_date}."
 
     expected = message
     assert actual == expected
