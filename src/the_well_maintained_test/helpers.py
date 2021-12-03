@@ -40,7 +40,7 @@ def _get_test_files(url: str, headers: dict) -> list:
     test_file_list = []
     r = requests.get(url, headers=headers).json()
     for i in r.get("tree"):
-        if i.get("type") == "blob" and re.search(r"test_(.*).py", i.get("path")):
+        if i.get("type") == "blob" and re.search(r"test(s|_(.*)).py", i.get("path")):
             test_file_list.append(i)
 
     return test_file_list

@@ -693,7 +693,11 @@ def test__get_test_files_exist(monkeypatch):
         {
             "type": "blob",
             "path": "tests/test_management.py",
-        }
+        },
+        {
+            "path": "friendship/tests/tests.py",
+            "type": "blob",
+        },
     ]
     assert actual == expected
 

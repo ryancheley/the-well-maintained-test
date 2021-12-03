@@ -320,7 +320,11 @@ class MockResponseTestFilesExist:
                 {
                     "type": "blob",
                     "path": "tests/test_management.py",
-                }
+                },
+                {
+                    "path": "friendship/tests/tests.py",
+                    "type": "blob",
+                },
             ]
         }
 
