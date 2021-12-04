@@ -138,6 +138,18 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
         )
         console.rule()
 
+    console.rule()
+
+    console.print(
+        Padding(
+            "This method is going to be depricated in v0.9.0. Please use --name instead",
+            answer_padding_style,
+            style=warning_style,
+        )
+    )
+
+    console.rule()
+
     console.print(questions.get("1"), style=question_style)
     console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
 
@@ -246,3 +258,112 @@ def check(resource):  # pragma: no cover
     """
     message = get_github_api_rate_limits(headers, resource)
     console.print(Padding(message, answer_padding_style, style=answer_style))
+
+
+@cli.command()
+@click.option(
+    "-n",
+    "--name",
+    type=click.STRING,
+    help="Show progress on test check",
+)
+@click.option(
+    "-b",
+    "--branch",
+    type=click.STRING,
+    help="Branch to check",
+)
+@click.option(
+    "-p",
+    "--progress",
+    type=click.BOOL,
+    default=True,
+    help="Show progress on test check",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["html", "txt"]),
+    help="Show progress on test check",
+)
+def package(name: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
+    pypi_url = f"https://pypi.org/pypi/{name}/json"
+    project_urls = requests.get(pypi_url).json().get("info").get("project_urls")
+    for _, v in project_urls.items():
+        if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
+            url = v
+
+    "url to a github repository you'd like to check"
+    if url[-1] == "/":
+        url = url.strip("/")
+
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
+        questions = json.load(file)
+
+    parse_object = urlparse(url)
+    author = parse_object.path.split("/")[-2]
+    package = parse_object.path.split("/")[-1]
+    api_url = f"https://api.github.com/repos/{author}/{package}"
+    if not branch:
+        default_branch = requests.get(api_url).json().get("default_branch")
+    else:
+        default_branch = branch
+    changelog_url = f"https://raw.githubusercontent.com/{author}/{package}/{default_branch}/CHANGELOG.md"
+    releases_url = f"https://www.github.com/{author}/{package}/releases"
+    commits_url = f"https://api.github.com/repos/{author}/{package}/commits/{default_branch}"
+    workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
+    ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
+    bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
+    changelog = requests.get(changelog_url, headers=headers)
+    release = requests.get(releases_url, headers=headers)
+    tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
+
+    vulnerabilities = get_vulnerabilities(pypi_url)
+    if vulnerabilities > 0:
+        console.rule("[bold red]Vulnerabilities detected!!!")
+        console.print(
+            Padding(f"There are {vulnerabilities} vulnerabilities in this package", answer_padding_style, style=warning_style)
+        )
+        console.rule()
+
+    console.print(questions.get("1"), style=question_style)
+    console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("2"), style=question_style)
+    console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("3"), style=question_style)
+    console.print(Padding(change_log_check(changelog, release), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("4"), style=question_style)
+    console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("5"), style=question_style)
+    console.print(Padding(check_tests(tree_url, headers, progress), special_answer_padding_style, style=answer_style))
+
+    console.print(questions.get("6"), style=question_style)
+    console.print(Padding(language_check(pypi_url), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("7"), style=question_style)
+    console.print(Padding(framework_check(pypi_url), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("8"), style=question_style)
+    console.print(Padding(ci_setup(workflows_url, headers), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("9"), style=question_style)
+    console.print(Padding(ci_passing(ci_status_url, headers), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("10"), style=question_style)
+    console.print(Padding(well_used(api_url, headers), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("11"), style=question_style)
+    console.print(Padding(commit_in_last_year(commits_url, headers), answer_padding_style, style=answer_style))
+
+    console.print(questions.get("12"), style=question_style)
+    console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
+
+    if output == "html":
+        console.save_html("output.html")
+
+    if output == "txt":
+        console.save_text("output.txt")
