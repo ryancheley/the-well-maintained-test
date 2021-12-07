@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 
 
 def get_long_description():
@@ -35,8 +35,8 @@ setup(
         [console_scripts]
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
-    package_data={"the_well_maintained_test": ["data/*.json"]},
-    install_requires=["click", "requests", "rich"],
+    package_data={"the_well_maintained_test": ["data/question*"]},
+    install_requires=["click", "requests", "rich", "toml"],
     extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy"]},
     python_requires=">=3.7",
     classifiers=[
