@@ -1,4 +1,5 @@
 import json
+import time
 from os import system
 from pathlib import Path
 from urllib.parse import urlparse
@@ -6,6 +7,7 @@ from urllib.parse import urlparse
 import click
 import pkg_resources
 import requests
+import toml
 from rich.console import Console
 from rich.padding import Padding
 from rich.prompt import Prompt
@@ -108,8 +110,8 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     if url[-1] == "/":
         url = url.strip("/")
 
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
-        questions = json.load(file)
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+        questions = toml.load(file)
 
     parse_object = urlparse(url)
     author = parse_object.path.split("/")[-2]
@@ -142,48 +144,53 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
 
     console.print(
         Padding(
-            "This method is going to be depricated in v0.9.0. Please use --name instead",
+            """
+            This method is going to be deprecated in v0.10.0.
+            Starting in v0.9.0 it will be an optional.
+            Please use --name instead
+            """,
             answer_padding_style,
             style=warning_style,
         )
     )
 
     console.rule()
+    time.sleep(3)
 
-    console.print(questions.get("1"), style=question_style)
+    console.print(questions.get("question").get("1").get("question_text"), style=question_style)
     console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("2"), style=question_style)
+    console.print(questions.get("question").get("2").get("question_text"), style=question_style)
     console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("3"), style=question_style)
+    console.print(questions.get("question").get("3").get("question_text"), style=question_style)
     console.print(Padding(change_log_check(changelog, release), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("4"), style=question_style)
+    console.print(questions.get("question").get("4").get("question_text"), style=question_style)
     console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("5"), style=question_style)
+    console.print(questions.get("question").get("5").get("question_text"), style=question_style)
     console.print(Padding(check_tests(tree_url, headers, progress), special_answer_padding_style, style=answer_style))
 
-    console.print(questions.get("6"), style=question_style)
+    console.print(questions.get("question").get("6").get("question_text"), style=question_style)
     console.print(Padding(language_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("7"), style=question_style)
+    console.print(questions.get("question").get("7").get("question_text"), style=question_style)
     console.print(Padding(framework_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("8"), style=question_style)
+    console.print(questions.get("question").get("8").get("question_text"), style=question_style)
     console.print(Padding(ci_setup(workflows_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("9"), style=question_style)
+    console.print(questions.get("question").get("9").get("question_text"), style=question_style)
     console.print(Padding(ci_passing(ci_status_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("10"), style=question_style)
+    console.print(questions.get("question").get("10").get("question_text"), style=question_style)
     console.print(Padding(well_used(api_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("11"), style=question_style)
+    console.print(questions.get("question").get("11").get("question_text"), style=question_style)
     console.print(Padding(commit_in_last_year(commits_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("12"), style=question_style)
+    console.print(questions.get("question").get("12").get("question_text"), style=question_style)
     console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
 
     if output == "html":
@@ -195,22 +202,36 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
 
 @cli.command()
 @click.option(
+    "-n",
+    "--name",
+    type=click.STRING,
+    help="Pass the name of the package to check",
+)
+@click.option(
     "-q",
     "--question",
-    type=click.STRING,
+    type=click.Choice(["all", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
     default="all",
     help="List of questions that are tested",
 )
-def questions(question: str) -> None:  # pragma: no cover
+def questions(name: str, question: str) -> None:  # pragma: no cover
     "List of questions tested"
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
-        questions = json.load(file)
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+        questions = toml.load(file)
 
     if question != "all":
-        console.print(questions.get(question), style=question_style)
+        console.print(questions.get("question").get(question).get("question_text"), style=question_style)
+        console.print(
+            Padding(questions.get("question").get(question).get("question_description"), answer_padding_style, style=answer_style)
+        )
+        if name:
+            question_function = (
+                f"[bold green]function_name[/bold green]: {questions.get('question').get(question).get('question_function')}"
+            )
+            console.print(question_function, style=question_style + " italic")
     else:
-        for _, v in questions.items():
-            console.print(v, style=question_style)
+        for _, v in questions.get("question").items():
+            console.print(v.get("question_text"), style=question_style)
 
 
 @cli.command()
@@ -297,8 +318,8 @@ def package(name: str, branch: str, progress: bool, output: str) -> None:  # pra
     if url[-1] == "/":
         url = url.strip("/")
 
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.json"))))) as file:
-        questions = json.load(file)
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+        questions = toml.load(file)
 
     parse_object = urlparse(url)
     author = parse_object.path.split("/")[-2]
@@ -326,40 +347,40 @@ def package(name: str, branch: str, progress: bool, output: str) -> None:  # pra
         )
         console.rule()
 
-    console.print(questions.get("1"), style=question_style)
+    console.print(questions.get("question").get("1").get("question_text"), style=question_style)
     console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("2"), style=question_style)
+    console.print(questions.get("question").get("2").get("question_text"), style=question_style)
     console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("3"), style=question_style)
+    console.print(questions.get("question").get("3").get("question_text"), style=question_style)
     console.print(Padding(change_log_check(changelog, release), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("4"), style=question_style)
+    console.print(questions.get("question").get("4").get("question_text"), style=question_style)
     console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("5"), style=question_style)
+    console.print(questions.get("question").get("5").get("question_text"), style=question_style)
     console.print(Padding(check_tests(tree_url, headers, progress), special_answer_padding_style, style=answer_style))
 
-    console.print(questions.get("6"), style=question_style)
+    console.print(questions.get("question").get("6").get("question_text"), style=question_style)
     console.print(Padding(language_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("7"), style=question_style)
+    console.print(questions.get("question").get("7").get("question_text"), style=question_style)
     console.print(Padding(framework_check(pypi_url), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("8"), style=question_style)
+    console.print(questions.get("question").get("8").get("question_text"), style=question_style)
     console.print(Padding(ci_setup(workflows_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("9"), style=question_style)
+    console.print(questions.get("question").get("9").get("question_text"), style=question_style)
     console.print(Padding(ci_passing(ci_status_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("10"), style=question_style)
+    console.print(questions.get("question").get("10").get("question_text"), style=question_style)
     console.print(Padding(well_used(api_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("11"), style=question_style)
+    console.print(questions.get("question").get("11").get("question_text"), style=question_style)
     console.print(Padding(commit_in_last_year(commits_url, headers), answer_padding_style, style=answer_style))
 
-    console.print(questions.get("12"), style=question_style)
+    console.print(questions.get("question").get("12").get("question_text"), style=question_style)
     console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
 
     if output == "html":
