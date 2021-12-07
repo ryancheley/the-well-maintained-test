@@ -67,6 +67,17 @@ If you want to see a single question and the original source from Adam Johnson's
     the-well-maintained-test questions -q 3
 
 
+    3. Is there a changelog?
+
+        A changelog, or a release notes page, is vital for our ability to update the package. The changelog is the main place for communication of breaking changes. (A case for changelogs is made at keepachangelog.com.)
+
+        Changelogs come in many forms: a single file, a documentation section, GitHub release descriptions, etc. Again, hopefully the package doesn’t make you hunt for it. 
+
+        Note that some projects “have a changelog”, but it has stopped being maintained since the project’s inception. So check that the changelog covers recent releases.
+
+    See https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-changelog for the original source.
+
+
 ## Development
 
 To contribute to this tool, first checkout the code. Then create a new virtual environment:
