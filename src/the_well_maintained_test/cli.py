@@ -37,6 +37,8 @@ answer_style = "italic"
 answer_padding_style = (1, 0, 1, 4)
 special_answer_padding_style = (0, 0, 0, 4)
 warning_style = "bold red"
+answer_link_style = "white"
+answer_link_padding_style = (0, 0, 0, 4)
 
 try:  # pragma: no cover
     with open("auth.json") as f:
@@ -224,11 +226,13 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
         console.print(
             Padding(questions.get("question").get(question).get("question_description"), answer_padding_style, style=answer_style)
         )
+        question_link_verbiage = f'See {questions.get("question").get(question).get("question_link")} for the original source.'
+        console.print(question_link_verbiage, style=answer_link_style)
         if name:
             question_function = (
                 f"[bold green]function_name[/bold green]: {questions.get('question').get(question).get('question_function')}"
             )
-            console.print(question_function, style=question_style + " italic")
+            console.print(Padding(question_function, answer_padding_style, style=question_style + " italic"))
     else:
         for _, v in questions.get("question").items():
             console.print(v.get("question_text"), style=question_style)

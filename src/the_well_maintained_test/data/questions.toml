@@ -8,6 +8,7 @@ The documentation shouldn’t have any banners or wording implying a future stab
 
 The version number should not be a pre-release, alpha, beta, release candidate, etc. Note that some maintainers stick with a “zero version number” like 0.4.0, even when they consider the package production ready.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-it-described-as-production-ready"
 question_function = "production_ready_check"
 [question.2]
 question_text = "2. Is there sufficient documentation?"
@@ -18,6 +19,7 @@ If we can’t find information on what the package currently does, it seems doub
 
 Documentation comes in many forms: a README file, a documentation site, a wiki, blog posts, etc. Hopefully the package doesn’t make you hunt for it.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-sufficient-documentation"
 question_function = "documentation_exists"
 [question.3]
 question_text = "3. Is there a changelog?"
@@ -28,6 +30,7 @@ Changelogs come in many forms: a single file, a documentation section, GitHub re
 
 Note that some projects “have a changelog”, but it has stopped being maintained since the project’s inception. So check that the changelog covers recent releases.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-changelog"
 question_function = "change_log_check"
 [question.4]
 question_text = "4. Is someone responding to bug reports?"
@@ -36,6 +39,7 @@ If recent bug reports have gone unanswered, it may be a sign that the package is
 
 Check for issues like “is this still maintained?”… the answer is probably “no”, per Betteridge's law of headlines.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-someone-responding-to-bug-reports"
 question_function = "bug_responding"
 [question.5]
 question_text = "5. Are there sufficient tests?"
@@ -48,6 +52,7 @@ Measurement of test coverage is normally a sign that the tests are higher qualit
 
 If there’s no proof of coverage, it’s worth opening a few test files, to check that they aren’t auto-created empty skeletons.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-there-sufficient-tests"
 question_function = "check_tests"
 [question.6]
 question_text = "6. Are the tests running with the latest <Language> version?"
@@ -58,6 +63,7 @@ We can grant some leeway for very recent language versions. If Python 3.10 was r
 
 Testing against a new language version can be an easy way to contribute. Often the new version only needs adding to the test matrix, although that may reveal some bugs.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-language-version"
 question_function = "language_check"
 [question.7]
 question_text = "7. Are the tests running with the latest <Integration> version?"
@@ -66,12 +72,14 @@ question_description = """
 
 The same conditions apply as for the latest <Language> version. And again, adding tests for a new version may be an easy way to contribute.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-integration-version"
 question_function = "framework_check"
 [question.8]
 question_text = "8. Is there a Continuous Integration (CI) configuration?"
 question_description = """
 If there are tests, it’s likely there’s a CI system set up, such as GitHub Actions. We should check that this in place, and running correctly for recent changes.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-continuous-integration-ci-configuration"
 question_function = "ci_setup"
 [question.9]
 question_text = "9. Is the CI passing?"
@@ -80,6 +88,7 @@ Some projects configure CI but then ignore it or leave it unmaintained. CI may b
 
 Sometimes CI failure is caused by a single small bug, so fixing it may be a quick contribution. It can also be the case that old versions of <Language> or <Integration>s can simply be dropped.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-the-ci-passing"
 question_function = "ci_passing"
 [question.10]
 question_text = "10. Does it seem relatively well used?"
@@ -88,6 +97,7 @@ We can guesstimate usage by checking recent download counts, and to a lesser ext
 
 We can only compare usage relative to similar packages, popularity of any <Integration>s, and our <Language>. A particularly niche tool may see minimal usage, but it might still beat any “competitor” packages.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#does-it-seem-relatively-well-used"
 question_function = "well_used"
 [question.11]
 question_text = "11. Has there been a commit in the last year?"
@@ -98,10 +108,12 @@ We’d like to see at least one recent commit as a “sign of life”.
 
 Any cutoff is arbitrary, but a year aligns with most programming languages’ annual release cadence.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-commit-in-the-last-year"
 question_function = "commit_in_last_year"
 [question.12]
 question_text = "12. Has there been a release in the last year?"
 question_description = """
 A backlog of unreleased commits can also be a sign of inattention. Active maintainers may have permission to merge but not release, with the true “owner” of the project absent.
 """
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-release-in-the-last-year"
 question_function = "release_in_last_year"
