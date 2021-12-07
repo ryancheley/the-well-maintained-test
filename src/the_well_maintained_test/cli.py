@@ -54,10 +54,18 @@ except FileNotFoundError:  # pragma: no cover
 @click.version_option()
 def cli():  # pragma: no cover
     """
-    Programatically tries to answer the 12 questions from \
-        Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+    Programatically tries to answer the 12 questions from Adam Johnson's
+    blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
     URL is a url to a github repository you'd like to check, for example:
-        the-well-maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+
+        the-well-maintained-test url 'https://github.com/ryancheley/the-well-maintained-test'
+
+    package is a package on pypi you'd like to check:
+
+        the-well-maintained-test package --name the-well-maintained-test
+
+    Note: URL is being deprecated and replaced with package starting in v0.9.0
+
     """
     pass
 
@@ -108,7 +116,7 @@ def auth(auth: str) -> None:  # pragma: no cover
     help="Show progress on test check",
 )
 def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
-    "url to a github repository you'd like to check"
+    "URL to a github repository you'd like to check. This method will be deprecated in v0.9.0"
     if url[-1] == "/":
         url = url.strip("/")
 
@@ -147,7 +155,7 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     console.print(
         Padding(
             """
-            This method is going to be deprecated in v0.10.0.
+            This method is going to be deprecated in v0.9.0.
             Starting in v0.9.0 it will be an optional.
             Please use --name instead
             """,
@@ -312,6 +320,14 @@ def check(resource):  # pragma: no cover
     help="Show progress on test check",
 )
 def package(name: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
+    """Name of a package on PyPi you'd like to check
+
+    Args:
+        name (str): [description]
+        branch (str): [description]
+        progress (bool): [description]
+        output (str): [description]
+    """
     pypi_url = f"https://pypi.org/pypi/{name}/json"
     project_urls = requests.get(pypi_url).json().get("info").get("project_urls")
     for _, v in project_urls.items():

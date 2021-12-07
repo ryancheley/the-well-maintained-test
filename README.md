@@ -33,31 +33,36 @@ This will create a file called auth.json in your current directory containing th
 
     Usage: the-well-maintained-test [OPTIONS] COMMAND [ARGS]...
 
-    Programatically tries to answer the 12 questions from Adam Johnson's 
-    blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/ URL is
-    a url to a github repository you'd like to check, for example:     the-well-
-    maintained-test 'https://github.com/ryancheley/the-well-maintained-test'
+    Programatically tries to answer the 12 questions from Adam Johnson's blog
+    post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/ URL is a url
+    to a github repository you'd like to check, for example:
+
+        the-well-maintained-test url 'https://github.com/ryancheley/the-well-
+        maintained-test'
+
+    package is a package on pypi you'd like to check:
+
+        the-well-maintained-test package --name the-well-maintained-test
+
+    Note: URL is being deprecated and replaced with package starting in v0.9.0
 
     Options:
     --version  Show the version and exit.
     --help     Show this message and exit.
 
     Commands:
-    auth            Save authentication credentials to a JSON file
-    questions       List of questions tested
-    requirements    Loop over a requirements.txt file
-    url             url to a github repository you'd like to check
-
-
-    URL is a url to a github repository you'd like to check, for example:
-
-        the-well-maintained-test url 'https://github.com/ryancheley/the-well-maintained-test'
+    auth          Save authentication credentials to a JSON file
+    check         Check your GitHub API Usage Stats.
+    package       Name of a package on PyPi you'd like to check
+    questions     List of questions tested
+    requirements  Loop over a requirements.txt file
+    url           URL to a github repository you'd like to check.
 
 If you want to see what questions will be answered before running you you can pass 
 
     the-well-maintained-test questions
 
-If you want to see a single question
+If you want to see a single question and the original source from Adam Johnson's blog
 
     the-well-maintained-test questions -q 3
 
