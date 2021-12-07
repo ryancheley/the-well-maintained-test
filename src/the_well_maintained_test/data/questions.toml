@@ -1,0 +1,119 @@
+[question]
+[question.1]
+question_text = "1. Is it described as “production ready”?"
+question_description = """
+We want to see evidence that the maintainers consider the software as ready for use in production.
+
+The documentation shouldn’t have any banners or wording implying a future stable release.
+
+The version number should not be a pre-release, alpha, beta, release candidate, etc. Note that some maintainers stick with a “zero version number” like 0.4.0, even when they consider the package production ready.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-it-described-as-production-ready"
+question_function = "production_ready_check"
+[question.2]
+question_text = "2. Is there sufficient documentation?"
+question_description = """
+If we can’t find information on what the package currently does, it seems doubtful the future will be easy.
+
+“Sufficient” varies based upon: the scope of the library, the ecosystem, and your preferences.
+
+Documentation comes in many forms: a README file, a documentation site, a wiki, blog posts, etc. Hopefully the package doesn’t make you hunt for it.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-sufficient-documentation"
+question_function = "documentation_exists"
+[question.3]
+question_text = "3. Is there a changelog?"
+question_description = """
+A changelog, or a release notes page, is vital for our ability to update the package. The changelog is the main place for communication of breaking changes. (A case for changelogs is made at keepachangelog.com.)
+
+Changelogs come in many forms: a single file, a documentation section, GitHub release descriptions, etc. Again, hopefully the package doesn’t make you hunt for it.
+
+Note that some projects “have a changelog”, but it has stopped being maintained since the project’s inception. So check that the changelog covers recent releases.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-changelog"
+question_function = "change_log_check"
+[question.4]
+question_text = "4. Is someone responding to bug reports?"
+question_description = """
+If recent bug reports have gone unanswered, it may be a sign that the package is no longer maintained. It’s worth ignoring any “spammy” open issues, and checking for recently closed issues since they are activity.
+
+Check for issues like “is this still maintained?”… the answer is probably “no”, per Betteridge's law of headlines.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-someone-responding-to-bug-reports"
+question_function = "bug_responding"
+[question.5]
+question_text = "5. Are there sufficient tests?"
+question_description = """
+Tests give us confidence that future changes will not result in bugs.
+
+Again, “sufficient” is context-dependent: testing norms in our language and ecosystem, ease of testing the functionality, and personal preferences.
+
+Measurement of test coverage is normally a sign that the tests are higher quality. With coverage, maintainers can at least tell when changes affect untested code.
+
+If there’s no proof of coverage, it’s worth opening a few test files, to check that they aren’t auto-created empty skeletons.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-there-sufficient-tests"
+question_function = "check_tests"
+[question.6]
+question_text = "6. Are the tests running with the latest <Language> version?"
+question_description = """
+Most programming languages iterate regularly. Python has annual releases, as does JavaScript (ECMAScript). If a package we’re considering doesn’t support the latest version, it may prevent us from upgrading.
+
+We can grant some leeway for very recent language versions. If Python 3.10 was released last Tuesday, we cannot expect every package to be up to date.
+
+Testing against a new language version can be an easy way to contribute. Often the new version only needs adding to the test matrix, although that may reveal some bugs.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-language-version"
+question_function = "language_check"
+[question.7]
+question_text = "7. Are the tests running with the latest <Integration> version?"
+question_description = """
+<Integration> here could mean a framework that the package is based on, like Django, or something the package interfaces with, like PostgreSQL. It could mean several things, in which case we can check them all.
+
+The same conditions apply as for the latest <Language> version. And again, adding tests for a new version may be an easy way to contribute.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-integration-version"
+question_function = "framework_check"
+[question.8]
+question_text = "8. Is there a Continuous Integration (CI) configuration?"
+question_description = """
+If there are tests, it’s likely there’s a CI system set up, such as GitHub Actions. We should check that this in place, and running correctly for recent changes.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-continuous-integration-ci-configuration"
+question_function = "ci_setup"
+[question.9]
+question_text = "9. Is the CI passing?"
+question_description = """
+Some projects configure CI but then ignore it or leave it unmaintained. CI may be failing, for one or more <Language> or <Framework> versions. If this has gone on for a while, it is a sign that maintenance is lagging.
+
+Sometimes CI failure is caused by a single small bug, so fixing it may be a quick contribution. It can also be the case that old versions of <Language> or <Integration>s can simply be dropped.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-the-ci-passing"
+question_function = "ci_passing"
+[question.10]
+question_text = "10. Does it seem relatively well used?"
+question_description = """
+We can guesstimate usage by checking recent download counts, and to a lesser extent, popularity metrics like GitHub’s “stars”. Many package indexes, like npm, show download counts on package pages. For PyPI, we can use pypistats.org.
+
+We can only compare usage relative to similar packages, popularity of any <Integration>s, and our <Language>. A particularly niche tool may see minimal usage, but it might still beat any “competitor” packages.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#does-it-seem-relatively-well-used"
+question_function = "well_used"
+[question.11]
+question_text = "11. Has there been a commit in the last year?"
+question_description = """
+Maintainers tend to abandon packages rather than explicitly mark them as unmaintained. So the probability of future maintenance drops off the longer a project has not seen a commit.
+
+We’d like to see at least one recent commit as a “sign of life”.
+
+Any cutoff is arbitrary, but a year aligns with most programming languages’ annual release cadence.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-commit-in-the-last-year"
+question_function = "commit_in_last_year"
+[question.12]
+question_text = "12. Has there been a release in the last year?"
+question_description = """
+A backlog of unreleased commits can also be a sign of inattention. Active maintainers may have permission to merge but not release, with the true “owner” of the project absent.
+"""
+question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-release-in-the-last-year"
+question_function = "release_in_last_year"

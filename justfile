@@ -14,7 +14,7 @@ coverage:
 
 # prunes remote branches from github
 prune:
-    git remote prune github
+    git remote prune origin
 
 # removes all but main and dev local branch
 gitclean:
