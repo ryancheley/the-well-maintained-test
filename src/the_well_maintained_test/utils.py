@@ -44,7 +44,9 @@ def documentation_exists(pypi_api_url: str) -> str:
     return message
 
 
-def change_log_check(changelog: requests.models.Response, release: requests.models.Response) -> str:
+def change_log_check(changelog_url: str, release_url: str) -> str:
+    changelog = requests.get(changelog_url)
+    release = requests.get(release_url)
     if changelog.status_code == 200 or release.status_code == 200:
         return "[green]Yes"
     else:
@@ -80,7 +82,7 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
     return message
 
 
-def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
+def check_tests(tree_url: str, headers: dict, show_progress: bool = True) -> str:
     """
     5. Are there sufficient tests?
     """

@@ -1,0 +1,10 @@
+[url]
+pypi_url = "https://pypi.org/pypi/{name}/json"
+bugs_url="https://api.github.com/repos/{author}/{name}/issues?labels=bug"
+tree_url="https://api.github.com/repos/{author}/{name}/git/trees/{default_branch}?recursive=1"
+workflows_url="https://api.github.com/repos/{author}/{name}/actions/workflows"
+ci_status_url="https://api.github.com/repos/{author}/{name}/actions/runs"
+api_url="https://api.github.com/repos/{author}/{name}"
+commits_url="https://api.github.com/repos/{author}/{name}/commits/{default_branch}"
+changelog_url="https://raw.githubusercontent.com/{author}/{name}/{default_branch}/CHANGELOG.md"
+release_url="https://www.github.com/{author}/{name}/releases"

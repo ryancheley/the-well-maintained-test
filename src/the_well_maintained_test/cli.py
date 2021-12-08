@@ -12,8 +12,12 @@ from rich.console import Console
 from rich.padding import Padding
 from rich.prompt import Prompt
 
-from the_well_maintained_test.helpers import _get_requirements_txt_file
+from the_well_maintained_test.helpers import (
+    _get_package_github_url,
+    _get_requirements_txt_file,
+)
 
+from . import utils
 from .utils import (
     bug_responding,
     change_log_check,
@@ -139,8 +143,8 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
     bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
-    changelog = requests.get(changelog_url, headers=headers)
-    release = requests.get(releases_url, headers=headers)
+    # changelog = requests.get(changelog_url, headers=headers)
+    # release = requests.get(releases_url, headers=headers)
     pypi_url = f"https://pypi.org/pypi/{package}/json"
     tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
 
@@ -176,7 +180,7 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
 
     console.print(questions.get("question").get("3").get("question_text"), style=question_style)
-    console.print(Padding(change_log_check(changelog, release), answer_padding_style, style=answer_style))
+    console.print(Padding(change_log_check(changelog_url, releases_url), answer_padding_style, style=answer_style))
 
     console.print(questions.get("question").get("4").get("question_text"), style=question_style)
     console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
@@ -231,7 +235,12 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
     with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
         questions = toml.load(file)
 
+    "List of URLs to use"
+    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("urls.toml"))))) as file:
+        urls = toml.load(file)
+
     if question != "all":
+        question_url = questions.get("question").get(question).get("question_url")
         console.print(questions.get("question").get(question).get("question_text"), style=question_style)
         console.print(
             Padding(questions.get("question").get(question).get("question_description"), answer_padding_style, style=answer_style)
@@ -243,6 +252,22 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
                 f"[bold green]function_name[/bold green]: {questions.get('question').get(question).get('question_function')}"
             )
             console.print(Padding(question_function, answer_padding_style, style=question_style + " italic"))
+            url = urls.get("url").get(question_url).replace("{name}", name)
+            github_url = _get_package_github_url(name)[1]
+            parse_object = urlparse(github_url)
+            author = parse_object.path.split("/")[-2]
+            if "{author}" in url:
+                url = url.replace("{author}", author)
+            if "{default_branch}" in url:
+                api_url = f"https://api.github.com/repos/{author}/{name}"
+                default_branch = requests.get(api_url).json().get("default_branch")
+                url = url.replace("{default_branch}", default_branch)
+
+            if questions.get("question").get(question).get("headers_needed") == "N":
+                console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url))
+            else:
+                console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url, headers))
+
     else:
         for _, v in questions.get("question").items():
             console.print(v.get("question_text"), style=question_style)
@@ -352,8 +377,8 @@ def package(package: str, branch: str, progress: bool, output: str) -> None:  # 
     workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
     ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
     bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
-    changelog = requests.get(changelog_url, headers=headers)
-    release = requests.get(releases_url, headers=headers)
+    # changelog = requests.get(changelog_url, headers=headers)
+    # release = requests.get(releases_url, headers=headers)
     tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
 
     vulnerabilities = get_vulnerabilities(pypi_url)
@@ -371,7 +396,7 @@ def package(package: str, branch: str, progress: bool, output: str) -> None:  # 
     console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
 
     console.print(questions.get("question").get("3").get("question_text"), style=question_style)
-    console.print(Padding(change_log_check(changelog, release), answer_padding_style, style=answer_style))
+    console.print(Padding(change_log_check(changelog_url, releases_url), answer_padding_style, style=answer_style))
 
     console.print(questions.get("question").get("4").get("question_text"), style=question_style)
     console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))

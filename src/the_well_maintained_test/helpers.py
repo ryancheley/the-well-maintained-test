@@ -73,9 +73,15 @@ def _get_requirements_txt_file(requirements_file: Path) -> List:
     packages = [s.replace("\n", "").replace("==", " ").split(" ")[0] for s in requirements]
     package_urls = []
     for package in packages:
-        url = f"https://pypi.org/pypi/{package}/json"
-        project_urls = requests.get(url).json().get("info").get("project_urls")
-        for k, v in project_urls.items():
-            if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
-                package_urls.append((package, v))
+        data = _get_package_github_url(package)
+        package_urls.append(data)
     return sorted(package_urls, key=lambda x: x[0].lower())
+
+
+def _get_package_github_url(package: str) -> tuple:
+    url = f"https://pypi.org/pypi/{package}/json"
+    project_urls = requests.get(url).json().get("info").get("project_urls")
+    for k, v in project_urls.items():
+        if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
+            value = (package, v)
+    return value
