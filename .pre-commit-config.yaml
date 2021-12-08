@@ -4,11 +4,11 @@ ci:
 
 repos:
 -   repo: https://github.com/psf/black
-    rev: 21.10b0
+    rev: 21.12b0
     hooks:
     - id: black
       language_version: python3.9
--   repo: https://gitlab.com/pycqa/flake8
+-   repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
     - id: flake8
