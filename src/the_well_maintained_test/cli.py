@@ -56,15 +56,16 @@ def cli():  # pragma: no cover
     """
     Programatically tries to answer the 12 questions from Adam Johnson's
     blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/
+
+    package is a package on pypi you'd like to check:
+
+        the-well-maintained-test package the-well-maintained-test
+
     URL is a url to a github repository you'd like to check, for example:
 
         the-well-maintained-test url 'https://github.com/ryancheley/the-well-maintained-test'
 
-    package is a package on pypi you'd like to check:
-
-        the-well-maintained-test package --name the-well-maintained-test
-
-    Note: URL is being deprecated and replaced with package starting in v0.9.0
+    Note: URL was deprecated and replaced with package starting in v0.9.0
 
     """
     pass
@@ -91,10 +92,11 @@ def auth(auth: str) -> None:  # pragma: no cover
 
 
 @cli.command()
-@click.argument(
-    "url",
+@click.option(
+    "-u",
+    "--url",
     type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
-    required=True,
+    help="GitHub URL to use",
 )
 @click.option(
     "-b",
@@ -294,12 +296,7 @@ def check(resource):  # pragma: no cover
 
 
 @cli.command()
-@click.option(
-    "-n",
-    "--name",
-    type=click.STRING,
-    help="Show progress on test check",
-)
+@click.argument("package", type=click.STRING, required=True)
 @click.option(
     "-b",
     "--branch",
@@ -319,7 +316,7 @@ def check(resource):  # pragma: no cover
     type=click.Choice(["html", "txt"]),
     help="Show progress on test check",
 )
-def package(name: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
+def package(package: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
     """Name of a package on PyPi you'd like to check
 
     Args:
@@ -328,7 +325,7 @@ def package(name: str, branch: str, progress: bool, output: str) -> None:  # pra
         progress (bool): [description]
         output (str): [description]
     """
-    pypi_url = f"https://pypi.org/pypi/{name}/json"
+    pypi_url = f"https://pypi.org/pypi/{package}/json"
     project_urls = requests.get(pypi_url).json().get("info").get("project_urls")
     for _, v in project_urls.items():
         if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
