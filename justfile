@@ -24,3 +24,8 @@ gitclean:
 # run mypy on the files
 mypy: 
     mypy src/the_well_maintained_test/*.py --no-strict-optional
+
+
+# generates the README.md file --help section
+cog:
+    cog -r README.md
