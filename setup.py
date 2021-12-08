@@ -37,7 +37,7 @@ setup(
     """,
     package_data={"the_well_maintained_test": ["data/question*"]},
     install_requires=["click", "requests", "rich", "toml"],
-    extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy"]},
+    extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy", "cogapp"]},
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 4 - Beta",
