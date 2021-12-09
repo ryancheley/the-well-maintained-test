@@ -64,8 +64,8 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  auth          Save authentication credentials to a JSON file
-  check         Check your GitHub API Usage Stats.
+  auth          Generates a json file with your GitHub Personal Token so...
+  check         Check your GitHub API Usage Stats
   package       Name of a package on PyPi you'd like to check
   questions     List of questions tested
   requirements  Loop over a requirements.txt file
