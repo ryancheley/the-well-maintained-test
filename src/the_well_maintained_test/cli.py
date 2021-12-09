@@ -273,10 +273,9 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
 def requirements(requirements_file, output):  # pragma: no cover
     "Loop over a requirements.txt file"
     packages = _get_requirements_txt_file(requirements_file)
-    packages = packages
     for package in packages:
         console.rule(f"[bold blue] {package[0]}")
-        cmd = f"the-well-maintained-test url '{package[1]}'"
+        cmd = f"the-well-maintained-test package '{package[0]}'"
         system(cmd)
         if output == "html":
             console.save_html(
