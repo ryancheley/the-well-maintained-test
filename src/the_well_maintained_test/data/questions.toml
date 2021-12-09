@@ -36,8 +36,8 @@ Note that some projects “have a changelog”, but it has stopped being maintai
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-changelog"
 question_function = "change_log_check"
-question_url = ""
-headers_needed = ""
+question_url = "pypi_url"
+headers_needed = "N"
 [question.4]
 question_text = "4. Is someone responding to bug reports?"
 question_description = """
