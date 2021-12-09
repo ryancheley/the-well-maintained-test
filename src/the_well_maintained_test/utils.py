@@ -248,7 +248,7 @@ def get_vulnerabilities(url: str) -> int:
     return vulnerability_count
 
 
-def save_auth(auth: str) -> None:
+def save_auth(auth: str) -> None:  # pragma: no cover
     # TODO: Write Test
     "Save authentication credentials to a JSON file"
     console.print("Create a GitHub personal user token and paste it here:")
