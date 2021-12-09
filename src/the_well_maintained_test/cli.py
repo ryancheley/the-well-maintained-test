@@ -145,9 +145,9 @@ def url(url: str, branch: str, progress: bool, output: str) -> None:  # pragma: 
     console.print(
         Padding(
             """
-            This method is going to be deprecated in v0.9.0.
-            Starting in v0.9.0 it will be an optional.
-            Please use --name instead
+            This method has been deprecated in v0.9.0.
+            It is now an optional.
+            Please use --name instead.
             """,
             answer_padding_style,
             style=warning_style,
