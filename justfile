@@ -1,6 +1,6 @@
 # run tests via pytest, creates coverage report, and then opens it up
 test:
-    coverage run -m pytest 
+    coverage run -m pytest
     coverage html --omit=src/the_well_maintained_test/cli.py--omit=src/the_well_maintained_test/cli.py
     open htmlcov/index.html
 
@@ -22,7 +22,7 @@ gitclean:
 
 
 # run mypy on the files
-mypy: 
+mypy:
     mypy src/the_well_maintained_test/*.py --no-strict-optional
 
 
