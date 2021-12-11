@@ -1,11 +1,15 @@
+import json
 import re
 from datetime import datetime
 from operator import attrgetter
+from pathlib import Path
 from time import localtime, strftime
 
 import requests
 from rich.progress import Progress
+from rich.prompt import Prompt
 
+from the_well_maintained_test.console import console
 from the_well_maintained_test.helpers import (
     _check_verb_agreement,
     _get_bug_comment_list,
@@ -44,8 +48,10 @@ def documentation_exists(pypi_api_url: str) -> str:
     return message
 
 
-def change_log_check(changelog: requests.models.Response, release: requests.models.Response) -> str:
-    if changelog.status_code == 200 or release.status_code == 200:
+def change_log_check(changelog_url: str) -> str:
+    project_urls = requests.get(changelog_url).json().get("info").get("project_urls")
+    change_log_types = ["Release notes", "Changelog"]
+    if any(item in change_log_types for item in list(project_urls.keys())):
         return "[green]Yes"
     else:
         return "[red]No"
@@ -80,7 +86,7 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
     return message
 
 
-def check_tests(tree_url: str, headers: dict, show_progress: bool) -> str:
+def check_tests(tree_url: str, headers: dict, show_progress: bool = True) -> str:
     """
     5. Are there sufficient tests?
     """
@@ -240,3 +246,16 @@ def get_vulnerabilities(url: str) -> int:
     vulnerabilities = requests.get(url).json().get("vulnerabilities")
     vulnerability_count = len(vulnerabilities)
     return vulnerability_count
+
+
+def save_auth(auth: str) -> None:  # pragma: no cover
+    # TODO: Write Test
+    "Save authentication credentials to a JSON file"
+    console.print("Create a GitHub personal user token and paste it here:")
+    personal_token = Prompt.ask("Personal token")
+    if Path(auth).exists():
+        auth_data = json.load(open(auth))
+    else:
+        auth_data = {}
+    auth_data["github_personal_token"] = personal_token
+    open(auth, "w").write(json.dumps(auth_data, indent=4) + "\n")

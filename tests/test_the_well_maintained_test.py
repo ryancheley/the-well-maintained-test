@@ -16,6 +16,8 @@ from tests.test_classes import (
     MockResponseBugsNo,
     MockResponseBugsWithNoResponse,
     MockResponseBugsYes,
+    MockResponseChangelogNo,
+    MockResponseChangelogYes,
     MockResponseCIFailing,
     MockResponseCINoConclusion,
     MockResponseCIPassing,
@@ -79,26 +81,36 @@ def test_version():
         assert result.output.startswith("cli, version ")
 
 
-@pytest.mark.parametrize(
-    "test_input,expected",
-    [
-        [[200, 200], "[green]Yes"],
-        [[404, 200], "[green]Yes"],
-        [[200, 404], "[green]Yes"],
-        [[404, 404], "[red]No"],
-    ],
-)
-def test_changelog(test_input, expected):
+def test_changelog_exists(monkeypatch):
     """
     3. Is there a changelog?
     """
-    changelog = requests.models.Response()
-    changelog.status_code = test_input[0]
-    release = requests.models.Response()
-    release.status_code = test_input[1]
 
-    test = change_log_check(changelog=changelog, release=release)
-    assert test == expected
+    def mock_get(*args, **kwargs):
+        return MockResponseChangelogYes()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    expected = "[green]Yes"
+    actual = change_log_check(url)
+    assert actual == expected
+
+
+def test_changelog_does_not_exist(monkeypatch):
+    """
+    3. Is there a changelog?
+    """
+
+    def mock_get(*args, **kwargs):
+        return MockResponseChangelogNo()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    expected = "[red]No"
+    actual = change_log_check(url)
+    assert actual == expected
 
 
 def test_bug_response_yes(monkeypatch):

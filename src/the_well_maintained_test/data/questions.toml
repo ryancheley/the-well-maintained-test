@@ -10,6 +10,8 @@ The version number should not be a pre-release, alpha, beta, release candidate, 
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-it-described-as-production-ready"
 question_function = "production_ready_check"
+question_url = "pypi_url"
+headers_needed = "N"
 [question.2]
 question_text = "2. Is there sufficient documentation?"
 question_description = """
@@ -21,6 +23,8 @@ Documentation comes in many forms: a README file, a documentation site, a wiki, 
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-sufficient-documentation"
 question_function = "documentation_exists"
+question_url = "pypi_url"
+headers_needed = "N"
 [question.3]
 question_text = "3. Is there a changelog?"
 question_description = """
@@ -32,6 +36,8 @@ Note that some projects “have a changelog”, but it has stopped being maintai
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-changelog"
 question_function = "change_log_check"
+question_url = "pypi_url"
+headers_needed = "N"
 [question.4]
 question_text = "4. Is someone responding to bug reports?"
 question_description = """
@@ -41,6 +47,8 @@ Check for issues like “is this still maintained?”… the answer is probably 
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-someone-responding-to-bug-reports"
 question_function = "bug_responding"
+question_url = "bugs_url"
+headers_needed = "Y"
 [question.5]
 question_text = "5. Are there sufficient tests?"
 question_description = """
@@ -54,6 +62,8 @@ If there’s no proof of coverage, it’s worth opening a few test files, to che
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-there-sufficient-tests"
 question_function = "check_tests"
+question_url = "tree_url"
+headers_needed = "Y"
 [question.6]
 question_text = "6. Are the tests running with the latest <Language> version?"
 question_description = """
@@ -65,6 +75,8 @@ Testing against a new language version can be an easy way to contribute. Often t
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-language-version"
 question_function = "language_check"
+question_url = "pypi_url"
+headers_needed = "N"
 [question.7]
 question_text = "7. Are the tests running with the latest <Integration> version?"
 question_description = """
@@ -74,6 +86,8 @@ The same conditions apply as for the latest <Language> version. And again, addin
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#are-the-tests-running-with-the-latest-integration-version"
 question_function = "framework_check"
+question_url = "pypi_url"
+headers_needed = "N"
 [question.8]
 question_text = "8. Is there a Continuous Integration (CI) configuration?"
 question_description = """
@@ -81,6 +95,8 @@ If there are tests, it’s likely there’s a CI system set up, such as GitHub A
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-there-a-continuous-integration-ci-configuration"
 question_function = "ci_setup"
+question_url = "workflows_url"
+headers_needed = "Y"
 [question.9]
 question_text = "9. Is the CI passing?"
 question_description = """
@@ -90,6 +106,8 @@ Sometimes CI failure is caused by a single small bug, so fixing it may be a quic
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#is-the-ci-passing"
 question_function = "ci_passing"
+question_url = "ci_status_url"
+headers_needed = "Y"
 [question.10]
 question_text = "10. Does it seem relatively well used?"
 question_description = """
@@ -99,6 +117,8 @@ We can only compare usage relative to similar packages, popularity of any <Integ
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#does-it-seem-relatively-well-used"
 question_function = "well_used"
+question_url = "api_url"
+headers_needed = "Y"
 [question.11]
 question_text = "11. Has there been a commit in the last year?"
 question_description = """
@@ -110,6 +130,8 @@ Any cutoff is arbitrary, but a year aligns with most programming languages’ an
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-commit-in-the-last-year"
 question_function = "commit_in_last_year"
+question_url = "commits_url"
+headers_needed = "Y"
 [question.12]
 question_text = "12. Has there been a release in the last year?"
 question_description = """
@@ -117,3 +139,5 @@ A backlog of unreleased commits can also be a sign of inattention. Active mainta
 """
 question_link = "https://adamj.eu/tech/2021/11/04/the-well-maintained-test/#has-there-been-a-release-in-the-last-year"
 question_function = "release_in_last_year"
+question_url = "pypi_url"
+headers_needed = "N"

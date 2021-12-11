@@ -421,3 +421,29 @@ class MockResponseWithoutVulnerabilities:
     @staticmethod
     def json():
         return {"vulnerabilities": []}
+
+
+class MockResponseChangelogYes:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    "Changelog": "https://github.com/ryancheley/the-well-maintained-test/releases",
+                }
+            }
+        }
+
+
+class MockResponseChangelogNo:
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    "Home Page": "https://github.com/ryancheley/the-well-maintained-test/releases",
+                }
+            }
+        }
