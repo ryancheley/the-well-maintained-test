@@ -447,3 +447,18 @@ class MockResponseChangelogNo:
                 }
             }
         }
+
+
+class MockResponseNonGitHubHomePage:
+    @staticmethod
+    def json():
+        return {
+            "info": {
+                "project_urls": {
+                    "CI": "https://github.com/author/package/actions",
+                    "Changelog": "https://github.com/author/package/releases",
+                    "Homepage": "https://www.package.com",
+                    "Issues": "https://github.com/author/package/issues",
+                }
+            }
+        }

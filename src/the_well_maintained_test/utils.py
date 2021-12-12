@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import datetime
+from gettext import ngettext
 from operator import attrgetter
 from pathlib import Path
 from time import localtime, strftime
@@ -11,7 +12,6 @@ from rich.prompt import Prompt
 
 from the_well_maintained_test.console import console
 from the_well_maintained_test.helpers import (
-    _check_verb_agreement,
     _get_bug_comment_list,
     _get_content,
     _get_release_date,
@@ -81,7 +81,7 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
             message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
             message = f"[green]{message1}\n{message2}"
         else:
-            verb = _check_verb_agreement(open_bug_count)
+            verb = ngettext("is", "are", open_bug_count)
             message = f"[red]There {verb} {open_bug_count} bugs with no comments"
     return message
 
@@ -106,7 +106,7 @@ def check_tests(tree_url: str, headers: dict, show_progress: bool = True) -> str
     if test_files == 0:
         message = "[red]There are 0 tests!"
     else:
-        verb = _check_verb_agreement(test_functions)
+        verb = ngettext("is", "are", test_functions)
         message = f"[green]There {verb} {test_functions} tests in {test_files} files:\n"
         for test in test_list:
             message += f"- {test.get('path')}\n"
@@ -149,7 +149,7 @@ def ci_setup(workflows_url: str, headers: dict) -> str:
     r = requests.get(workflows_url, headers=headers).json()
     if r.get("total_count") > 0:
         workflow_count = r.get("total_count")
-        verb = _check_verb_agreement(workflow_count)
+        verb = ngettext("is", "are", workflow_count)
         message = f"[green]There {verb} {workflow_count} workflows\n"
         for i in r.get("workflows"):
             message += f"[green]- {i.get('name')}\n"

@@ -13,11 +13,12 @@ import requests
 def _get_bug_comment_list(url: str, headers: dict) -> list:
     BugComments = namedtuple("BugComments", ["text", "create_date"])
     bug_comment_list = []
-    timeline = requests.get(url, headers=headers).json()[-1]
-    if timeline.get("event") == "commented":
-        bug_comment = timeline.get("body")
-        bug_comment_date = datetime.strptime(timeline.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-        bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
+    timeline = requests.get(url, headers=headers).json()
+    for t in timeline:
+        if t.get("event") == "commented":
+            bug_comment = t.get("body")
+            bug_comment_date = datetime.strptime(t.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+            bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
     return bug_comment_list
 
 
@@ -59,14 +60,6 @@ def _get_release_date(release: dict) -> List:
     return releases
 
 
-def _check_verb_agreement(count: int) -> str:
-    if count == 1:
-        verb = "is"
-    else:
-        verb = "are"
-    return verb
-
-
 def _get_requirements_txt_file(requirements_file: Path) -> List:
     with open(requirements_file) as f:
         requirements = f.readlines()
@@ -84,4 +77,8 @@ def _get_package_github_url(package: str) -> tuple:
     for k, v in project_urls.items():
         if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
             value = (package, v)
+        elif urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 4:
+            p = urlparse(v).path.split("/")[1]
+            a = urlparse(v).path.split("/")[2]
+            value = (package, f"https://www.github.com/{p}/{a}")
     return value
