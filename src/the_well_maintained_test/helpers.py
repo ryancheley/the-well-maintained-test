@@ -13,11 +13,12 @@ import requests
 def _get_bug_comment_list(url: str, headers: dict) -> list:
     BugComments = namedtuple("BugComments", ["text", "create_date"])
     bug_comment_list = []
-    timeline = requests.get(url, headers=headers).json()[-1]
-    if timeline.get("event") == "commented":
-        bug_comment = timeline.get("body")
-        bug_comment_date = datetime.strptime(timeline.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
-        bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
+    timeline = requests.get(url, headers=headers).json()
+    for t in timeline:
+        if t.get("event") == "commented":
+            bug_comment = t.get("body")
+            bug_comment_date = datetime.strptime(t.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+            bug_comment_list.append(BugComments(bug_comment, bug_comment_date))
     return bug_comment_list
 
 
