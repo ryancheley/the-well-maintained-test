@@ -52,13 +52,6 @@ Usage: the-well-maintained-test [OPTIONS] COMMAND [ARGS]...
 
       the-well-maintained-test package the-well-maintained-test
 
-  URL is a url to a github repository you'd like to check, for example:
-
-      the-well-maintained-test url 'https://github.com/ryancheley/the-well-
-      maintained-test'
-
-  Note: URL was deprecated and replaced with package starting in v0.9.0
-
 Options:
   --version  Show the version and exit.
   --help     Show this message and exit.
@@ -69,7 +62,6 @@ Commands:
   package       Name of a package on PyPi you'd like to check
   questions     List of questions tested
   requirements  Loop over a requirements.txt file
-  url           URL to a github repository you'd like to check.
 
 ```
 <!-- [[[end]]] -->
