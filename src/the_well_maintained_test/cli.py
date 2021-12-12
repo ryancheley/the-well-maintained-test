@@ -54,12 +54,6 @@ def cli():  # pragma: no cover
 
         the-well-maintained-test package the-well-maintained-test
 
-    URL is a url to a github repository you'd like to check, for example:
-
-        the-well-maintained-test url 'https://github.com/ryancheley/the-well-maintained-test'
-
-    Note: URL was deprecated and replaced with package starting in v0.9.0
-
     """
     pass
 
