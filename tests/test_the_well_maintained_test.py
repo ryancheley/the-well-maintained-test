@@ -33,6 +33,7 @@ from tests.test_classes import (
     MockResponseFrameworkCheck,
     MockResponseGitHubRateLimit,
     MockResponseLanguageCheck,
+    MockResponseNonGitHubHomePage,
     MockResponseProductionReadyNo,
     MockResponseProductionReadyYes,
     MockResponseProjectURLs,
@@ -48,6 +49,7 @@ from tests.test_classes import (
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.helpers import (
     _check_verb_agreement,
+    _get_package_github_url,
     _get_requirements_txt_file,
 )
 from the_well_maintained_test.utils import (
@@ -840,4 +842,15 @@ def test_get_vulnerabilities_no(monkeypatch):
     url = "https://fakeurl"
     actual = get_vulnerabilities(url)
     expected = 0
+    assert actual == expected
+
+
+def test__get_package_github_url_non_github_homepage(monkeypatch):
+    def mock_get(*args, **kwargs):
+        return MockResponseNonGitHubHomePage()
+
+    monkeypatch.setattr(requests, "get", mock_get)
+    url = "https://fakeurl"
+    actual = _get_package_github_url(url)[1]
+    expected = "https://www.github.com/author/package"
     assert actual == expected

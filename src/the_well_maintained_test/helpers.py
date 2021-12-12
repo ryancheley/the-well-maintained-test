@@ -85,4 +85,8 @@ def _get_package_github_url(package: str) -> tuple:
     for k, v in project_urls.items():
         if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
             value = (package, v)
+        elif urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 4:
+            p = urlparse(v).path.split("/")[1]
+            a = urlparse(v).path.split("/")[2]
+            value = (package, f"https://www.github.com/{p}/{a}")
     return value

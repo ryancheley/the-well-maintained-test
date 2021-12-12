@@ -216,10 +216,7 @@ def package(package: str, branch: str, progress: bool, output: str) -> None:  # 
         name (str): The name of the Package from PyPi
     """
     pypi_url = f"https://pypi.org/pypi/{package}/json"
-    project_urls = requests.get(pypi_url).json().get("info").get("project_urls")
-    for _, v in project_urls.items():
-        if urlparse(v).netloc == "github.com" and len(urlparse(v).path.split("/")) == 3:
-            url = v
+    url = _get_package_github_url(package)[1]
 
     "url to a github repository you'd like to check"
     if url[-1] == "/":
