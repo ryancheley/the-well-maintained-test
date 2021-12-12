@@ -60,14 +60,6 @@ def _get_release_date(release: dict) -> List:
     return releases
 
 
-def _check_verb_agreement(count: int) -> str:
-    if count == 1:
-        verb = "is"
-    else:
-        verb = "are"
-    return verb
-
-
 def _get_requirements_txt_file(requirements_file: Path) -> List:
     with open(requirements_file) as f:
         requirements = f.readlines()

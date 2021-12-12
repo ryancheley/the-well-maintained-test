@@ -48,7 +48,6 @@ from tests.test_classes import (
 )
 from the_well_maintained_test.cli import cli
 from the_well_maintained_test.helpers import (
-    _check_verb_agreement,
     _get_package_github_url,
     _get_requirements_txt_file,
 )
@@ -775,19 +774,6 @@ def test__get_release_date_missing():
     actual = _get_release_date(release)
     expected = []
     assert actual == expected
-
-
-@pytest.mark.parametrize(
-    "test_input,expected",
-    [
-        [0, "are"],
-        [1, "is"],
-        [2, "are"],
-        [-1, "are"],
-    ],
-)
-def test__check_verb_agreement(test_input, expected):
-    assert _check_verb_agreement(test_input) == expected
 
 
 def test__get_requirements_txt_file(tmpdir, monkeypatch):
