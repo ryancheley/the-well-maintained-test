@@ -100,34 +100,42 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
         urls = toml.load(file)
 
     if question != "all":
-        question_url = questions.get("question").get(question).get("question_url")
-        console.print(questions.get("question").get(question).get("question_text"), style=question_style)
-        console.print(
-            Padding(questions.get("question").get(question).get("question_description"), answer_padding_style, style=answer_style)
-        )
-        question_link_verbiage = f'See {questions.get("question").get(question).get("question_link")} for the original source.'
-        console.print(question_link_verbiage, style=answer_link_style)
-        if name:
-            question_function = (
-                f"[bold green]function_name[/bold green]: {questions.get('question').get(question).get('question_function')}"
+        try:
+            question_url = questions.get("question").get(question).get("question_url")
+            console.print(questions.get("question").get(question).get("question_text"), style=question_style)
+            console.print(
+                Padding(
+                    questions.get("question").get(question).get("question_description"), answer_padding_style, style=answer_style
+                )
             )
-            console.print(Padding(question_function, answer_padding_style, style=question_style + " italic"))
-            url = urls.get("url").get(question_url).replace("{name}", name)
-            github_url = _get_package_github_url(name)[1]
-            parse_object = urlparse(github_url)
-            author = parse_object.path.split("/")[-2]
-            if "{author}" in url:
-                url = url.replace("{author}", author)
-            if "{default_branch}" in url:
-                api_url = f"https://api.github.com/repos/{author}/{name}"
-                default_branch = requests.get(api_url).json().get("default_branch")
-                url = url.replace("{default_branch}", default_branch)
+            question_link_verbiage = (
+                f'See {questions.get("question").get(question).get("question_link")} for the original source.'
+            )
+            console.print(question_link_verbiage, style=answer_link_style)
+            if name:
+                question_function = (
+                    f"[bold green]function_name[/bold green]: {questions.get('question').get(question).get('question_function')}"
+                )
+                console.print(Padding(question_function, answer_padding_style, style=question_style + " italic"))
+                url = urls.get("url").get(question_url).replace("{name}", name)
+                github_url = _get_package_github_url(name)[1]
+                parse_object = urlparse(github_url)
+                author = parse_object.path.split("/")[-2]
+                if "{author}" in url:
+                    url = url.replace("{author}", author)
+                if "{default_branch}" in url:
+                    api_url = f"https://api.github.com/repos/{author}/{name}"
+                    default_branch = requests.get(api_url).json().get("default_branch")
+                    url = url.replace("{default_branch}", default_branch)
 
-            if questions.get("question").get(question).get("headers_needed") == "N":
-                console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url))
-            else:
-                console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url, headers))
-
+                if questions.get("question").get(question).get("headers_needed") == "N":
+                    console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url))
+                else:
+                    console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url, headers))
+        except (AttributeError, TypeError):
+            console.print(
+                f"The package [bold red]{name}[/bold red] does not have enough information supplied by PyPi to continue."
+            )
     else:
         for _, v in questions.get("question").items():
             console.print(v.get("question_text"), style=question_style)
@@ -209,76 +217,82 @@ def package(package: str, branch: str, progress: bool, output: str) -> None:  # 
     Args:\n
         name (str): The name of the Package from PyPi
     """
-    pypi_url = f"https://pypi.org/pypi/{package}/json"
-    url = _get_package_github_url(package)[1]
+    try:
+        pypi_url = f"https://pypi.org/pypi/{package}/json"
+        url = _get_package_github_url(package)[1]
 
-    "url to a github repository you'd like to check"
-    if url[-1] == "/":
-        url = url.strip("/")
+        "url to a github repository you'd like to check"
+        if url[-1] == "/":
+            url = url.strip("/")
 
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
-        questions = toml.load(file)
+        with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+            questions = toml.load(file)
 
-    parse_object = urlparse(url)
-    author = parse_object.path.split("/")[-2]
-    package = parse_object.path.split("/")[-1]
-    api_url = f"https://api.github.com/repos/{author}/{package}"
-    if not branch:
-        default_branch = requests.get(api_url).json().get("default_branch")
-    else:
-        default_branch = branch
-    commits_url = f"https://api.github.com/repos/{author}/{package}/commits/{default_branch}"
-    workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
-    ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
-    bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
-    tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
+        parse_object = urlparse(url)
+        author = parse_object.path.split("/")[-2]
+        package = parse_object.path.split("/")[-1]
+        api_url = f"https://api.github.com/repos/{author}/{package}"
+        if not branch:
+            default_branch = requests.get(api_url).json().get("default_branch")
+        else:
+            default_branch = branch
+        commits_url = f"https://api.github.com/repos/{author}/{package}/commits/{default_branch}"
+        workflows_url = f"https://api.github.com/repos/{author}/{package}/actions/workflows"
+        ci_status_url = f"https://api.github.com/repos/{author}/{package}/actions/runs"
+        bugs_url = f"https://api.github.com/repos/{author}/{package}/issues?labels=bug"
+        tree_url = f"https://api.github.com/repos/{author}/{package}/git/trees/{default_branch}?recursive=1"
 
-    vulnerabilities = get_vulnerabilities(pypi_url)
-    if vulnerabilities > 0:
-        console.rule("[bold red]Vulnerabilities detected!!!")
+        vulnerabilities = get_vulnerabilities(pypi_url)
+        if vulnerabilities > 0:
+            console.rule("[bold red]Vulnerabilities detected!!!")
+            console.print(
+                Padding(f"There are {vulnerabilities} vulnerabilities in this package", answer_padding_style, style=warning_style)
+            )
+            console.rule()
+
+        console.print(questions.get("question").get("1").get("question_text"), style=question_style)
+        console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("2").get("question_text"), style=question_style)
+        console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("3").get("question_text"), style=question_style)
+        console.print(Padding(change_log_check(pypi_url), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("4").get("question_text"), style=question_style)
+        console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("5").get("question_text"), style=question_style)
+        console.print(Padding(check_tests(tree_url, headers, progress), special_answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("6").get("question_text"), style=question_style)
+        console.print(Padding(language_check(pypi_url), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("7").get("question_text"), style=question_style)
+        console.print(Padding(framework_check(pypi_url), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("8").get("question_text"), style=question_style)
+        console.print(Padding(ci_setup(workflows_url, headers), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("9").get("question_text"), style=question_style)
+        console.print(Padding(ci_passing(ci_status_url, headers), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("10").get("question_text"), style=question_style)
+        console.print(Padding(well_used(api_url, headers), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("11").get("question_text"), style=question_style)
+        console.print(Padding(commit_in_last_year(commits_url, headers), answer_padding_style, style=answer_style))
+
+        console.print(questions.get("question").get("12").get("question_text"), style=question_style)
+        console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
+
+        if output == "html":
+            console.save_html("output.html")
+
+        if output == "txt":
+            console.save_text("output.txt")
+
+    except (AttributeError, TypeError):
         console.print(
-            Padding(f"There are {vulnerabilities} vulnerabilities in this package", answer_padding_style, style=warning_style)
+            f"The package [bold red]{package}[/bold red] does not have enough information supplied by PyPi to continue."
         )
-        console.rule()
-
-    console.print(questions.get("question").get("1").get("question_text"), style=question_style)
-    console.print(Padding(production_ready_check(pypi_url), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("2").get("question_text"), style=question_style)
-    console.print(Padding(documentation_exists(pypi_url), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("3").get("question_text"), style=question_style)
-    console.print(Padding(change_log_check(pypi_url), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("4").get("question_text"), style=question_style)
-    console.print(Padding(bug_responding(bugs_url, headers), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("5").get("question_text"), style=question_style)
-    console.print(Padding(check_tests(tree_url, headers, progress), special_answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("6").get("question_text"), style=question_style)
-    console.print(Padding(language_check(pypi_url), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("7").get("question_text"), style=question_style)
-    console.print(Padding(framework_check(pypi_url), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("8").get("question_text"), style=question_style)
-    console.print(Padding(ci_setup(workflows_url, headers), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("9").get("question_text"), style=question_style)
-    console.print(Padding(ci_passing(ci_status_url, headers), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("10").get("question_text"), style=question_style)
-    console.print(Padding(well_used(api_url, headers), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("11").get("question_text"), style=question_style)
-    console.print(Padding(commit_in_last_year(commits_url, headers), answer_padding_style, style=answer_style))
-
-    console.print(questions.get("question").get("12").get("question_text"), style=question_style)
-    console.print(Padding(release_in_last_year(pypi_url), answer_padding_style, style=answer_style))
-
-    if output == "html":
-        console.save_html("output.html")
-
-    if output == "txt":
-        console.save_text("output.txt")
