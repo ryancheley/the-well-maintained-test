@@ -9,6 +9,14 @@ from urllib.parse import urlparse
 
 import requests
 
+SORRY_MESSAGE = """
+This package does not have project_urls defined. You may want to contact them or raise an issue with them to include it.
+
+Documentation for project_urls can be found here:
+
+https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/#project-urls
+"""
+
 
 def _get_bug_comment_list(url: str, headers: dict) -> list:
     BugComments = namedtuple("BugComments", ["text", "create_date"])

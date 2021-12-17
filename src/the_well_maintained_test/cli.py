@@ -16,6 +16,7 @@ from the_well_maintained_test.helpers import (
 from . import utils
 from .console import console
 from .headers import headers
+from .helpers import SORRY_MESSAGE
 from .styles import (
     answer_link_style,
     answer_padding_style,
@@ -133,9 +134,7 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
                 else:
                     console.print(getattr(utils, questions.get("question").get(question).get("question_function"))(url, headers))
         except (AttributeError, TypeError):
-            console.print(
-                f"The package [bold red]{name}[/bold red] does not have enough information supplied by PyPi to continue."
-            )
+            console.print(SORRY_MESSAGE)
     else:
         for _, v in questions.get("question").items():
             console.print(v.get("question_text"), style=question_style)
@@ -293,6 +292,4 @@ def package(package: str, branch: str, progress: bool, output: str) -> None:  # 
             console.save_text("output.txt")
 
     except (AttributeError, TypeError):
-        console.print(
-            f"The package [bold red]{package}[/bold red] does not have enough information supplied by PyPi to continue."
-        )
+        console.print(SORRY_MESSAGE)
