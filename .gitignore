@@ -14,3 +14,4 @@ dist
 # ignore the output files generated
 output.html
 output.txt
+build
