@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-VERSION = "0.10.1"
+VERSION = "0.10.2"
 
 
 def get_long_description():
@@ -35,7 +35,7 @@ setup(
         [console_scripts]
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
-    package_data={"the_well_maintained_test": ["data/question*"]},
+    package_data={"the_well_maintained_test": ["data/question*", "data/urls.toml"]},
     install_requires=["click", "requests", "rich", "toml"],
     extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy", "cogapp"]},
     python_requires=">=3.7",
