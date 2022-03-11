@@ -1,3 +1,4 @@
+import json
 from os import system
 from pathlib import Path
 from urllib.parse import urlparse
@@ -15,7 +16,6 @@ from the_well_maintained_test.helpers import (
 
 from . import utils
 from .console import console
-from .headers import headers
 from .helpers import SORRY_MESSAGE
 from .styles import (
     answer_link_style,
@@ -91,7 +91,13 @@ def auth(auth: str) -> None:  # pragma: no cover
     default="all",
     help="List of questions that are tested",
 )
-def questions(name: str, question: str) -> None:  # pragma: no cover
+@click.option(
+    "-s",
+    "--auth-string",
+    type=click.STRING,
+    help="GitHub API Token to pass as a string",
+)
+def questions(name: str, question: str, auth_string: str) -> None:  # pragma: no cover
     "List of questions tested"
     with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
         questions = toml.load(file)
@@ -99,6 +105,19 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
     "List of URLs to use"
     with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("urls.toml"))))) as file:
         urls = toml.load(file)
+
+    try:
+        with open(auth) as f:
+            data = json.load(f)
+        headers = {
+            "Authorization": f'token {data["github_personal_token"]}',
+        }
+    except FileNotFoundError:
+        headers = {}
+    if auth_string:
+        headers = {
+            "Authorization": f"token {auth_string}",
+        }
 
     if question != "all":
         try:
@@ -153,12 +172,19 @@ def questions(name: str, question: str) -> None:  # pragma: no cover
     type=click.Choice(["html", "txt"]),
     help="Show progress on test check",
 )
-def requirements(requirements_file, output):  # pragma: no cover
+@click.option(
+    "-a",
+    "--auth",
+    type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
+    default="auth.json",
+    help="Path to auth tokens, defaults to auth.json",
+)
+def requirements(requirements_file, output, auth):  # pragma: no cover
     "Loop over a requirements.txt file"
     packages = _get_requirements_txt_file(requirements_file)
     for package in packages:
         console.rule(f"[bold blue] {package[0]}")
-        cmd = f"the-well-maintained-test package '{package[0]}'"
+        cmd = f"the-well-maintained-test package '{package[0]}' --auth {auth}"
         system(cmd)
         if output == "html":
             console.save_html(
@@ -178,14 +204,42 @@ def requirements(requirements_file, output):  # pragma: no cover
     show_default=True,
     help="Show progress on test check",
 )
-def check(resource: str):  # pragma: no cover
+@click.option(
+    "-a",
+    "--auth",
+    type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
+    default="auth.json",
+    help="Path to auth tokens, defaults to auth.json",
+)
+@click.option(
+    "-s",
+    "--auth-string",
+    type=click.STRING,
+    help="GitHub API Token to pass as a string",
+)
+def check(resource: str, auth, auth_string):  # pragma: no cover
     """Check your GitHub API Usage Stats
 
     Args:\n
         resource (str): Which GitHub resource to check. See Options below.
     """
+    try:
+        with open(auth) as f:
+            data = json.load(f)
+        headers = {
+            "Authorization": f'token {data["github_personal_token"]}',
+        }
+    except FileNotFoundError:
+        headers = {}
+    if auth_string:
+        headers = {
+            "Authorization": f"token {auth_string}",
+        }
+    try:
+        message = get_github_api_rate_limits(headers, resource)
+    except AttributeError:
+        message = f"There is an issue with the Token '{auth_string}'"
 
-    message = get_github_api_rate_limits(headers, resource)
     console.print(Padding(message, answer_padding_style, style=answer_style))
 
 
@@ -210,12 +264,37 @@ def check(resource: str):  # pragma: no cover
     type=click.Choice(["html", "txt"]),
     help="Save the output as HTML or TXT",
 )
-def package(package: str, branch: str, progress: bool, output: str) -> None:  # pragma: no cover
+@click.option(
+    "-a",
+    "--auth",
+    type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
+    default="auth.json",
+    help="Path to auth tokens, defaults to auth.json",
+)
+@click.option(
+    "-s",
+    "--auth-string",
+    type=click.STRING,
+    help="GitHub API Token to pass as a string",
+)
+def package(package: str, branch: str, progress: bool, output: str, auth, auth_string) -> None:  # pragma: no cover
     """Name of a package on PyPi you'd like to check
 
     Args:\n
         name (str): The name of the Package from PyPi
     """
+    try:
+        with open(auth) as f:
+            data = json.load(f)
+        headers = {
+            "Authorization": f'token {data["github_personal_token"]}',
+        }
+    except FileNotFoundError:
+        headers = {}
+    if auth_string:
+        headers = {
+            "Authorization": f"token {auth_string}",
+        }
     try:
         pypi_url = f"https://pypi.org/pypi/{package}/json"
         url = _get_package_github_url(package)[1]
