@@ -15,10 +15,24 @@ Programatically tries to answer the 12 questions from Adam Johnson's [blog post]
 
 ## Installation
 
-Install this tool using `pip`:
+### pipx
 
-    $ pip install the-well-maintained-test
+The preferred method of installation for this tool is [pipx](https://pypa.github.io/pipx/).
 
+    pipx install the-well-maintained-test
+
+### virtual environment
+
+This tool can be installed in a virtual environment using pip:
+
+Create your virtual environment
+
+    python3 -m venv venv
+    source venv/bin/activate
+
+Install with pip
+
+    python -m pip install the-well-maintained-test
 
 ## Authentication
 The GitHub API will rate limit anonymous calls. You can authenticate yourself with a personal token (documentation on how to generate is [here](https://github.com/settings/tokens))
@@ -71,7 +85,7 @@ Commands:
 To contribute to this tool, first checkout the code. Then create a new virtual environment:
 
     cd the-well-maintained-test
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate
 
 Or if you are using `pipenv`:
@@ -90,12 +104,23 @@ To run `mypy` command you'll need to run
 
     mypy --install-types
 
+The commands below use the command runner [just](https://github.com/casey/just). If you would rather not use `just` the raw commands are also listed below
+
 Then, to run mypy:
 
     just mypy
 
+OR the raw command is
+
+    mypy src/the_well_maintained_test/*.py --no-strict-optional
+
 You can also do a pre-commit check on the files by running
 
     just check
+
+OR the raw commands are
+
+    pre-commit run --all-files
+    mypy src/the_well_maintained_test/*.py --no-strict-optional
 
 This will run several pre-commit hooks, but before that it will run `mypy`
