@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import click
-import pkg_resources
+import importlib_resources
 import requests
 import toml
 from rich.padding import Padding
@@ -99,11 +99,13 @@ def auth(auth: str) -> None:  # pragma: no cover
 )
 def questions(name: str, question: str, auth_string: str) -> None:  # pragma: no cover
     "List of questions tested"
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+    questions_file = importlib_resources.files(__name__) / str(Path("data").joinpath("questions.toml"))
+    with open(Path(questions_file)) as file:
         questions = toml.load(file)
 
     "List of URLs to use"
-    with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("urls.toml"))))) as file:
+    urls_file = importlib_resources.files(__name__) / str(Path("data").joinpath("urls.toml"))
+    with open(Path(urls_file)) as file:
         urls = toml.load(file)
 
     try:
@@ -302,8 +304,8 @@ def package(package: str, branch: str, progress: bool, output: str, auth, auth_s
         "url to a github repository you'd like to check"
         if url[-1] == "/":
             url = url.strip("/")
-
-        with open(Path(pkg_resources.resource_filename(__name__, str(Path("data").joinpath("questions.toml"))))) as file:
+        questions_file = importlib_resources.files(__name__) / str(Path("data").joinpath("questions.toml"))
+        with open(Path(questions_file)) as file:
             questions = toml.load(file)
 
         parse_object = urlparse(url)
