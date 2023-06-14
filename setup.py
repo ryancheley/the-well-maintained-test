@@ -36,7 +36,7 @@ setup(
         the-well-maintained-test=the_well_maintained_test.cli:cli
     """,
     package_data={"the_well_maintained_test": ["data/question*", "data/urls.toml"]},
-    install_requires=["click", "requests", "rich", "toml"],
+    install_requires=["click", "importlib-resources", "requests", "rich", "toml"],
     extras_require={"test": ["pytest", "black", "isort", "coverage", "mypy", "cogapp"]},
     python_requires=">=3.7",
     classifiers=[
