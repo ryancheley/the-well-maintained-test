@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from gettext import ngettext
 from operator import attrgetter
 from pathlib import Path
@@ -74,7 +74,12 @@ def bug_responding(bugs_url: str, headers: dict) -> str:
         bug_comment_list = sorted(bug_comment_list, key=attrgetter("create_date"), reverse=True)
         if bug_comment_list:
             bug_turn_around_time_reply_days = (bug_comment_list[0].create_date - bug_create_date).days
-            days_since_last_bug_comment = (datetime.utcnow() - bug_comment_list[0].create_date).days
+            # If bug_comment_list[0].create_date is naive, make it timezone-aware
+            if bug_comment_list[0].create_date.tzinfo is None:
+                create_date = bug_comment_list[0].create_date.replace(tzinfo=timezone.utc)
+            else:
+                create_date = bug_comment_list[0].create_date
+            days_since_last_bug_comment = (datetime.now(timezone.utc) - create_date).days
             # TODO: add logic to better colorize the message
             message1 = f"The maintainer took {bug_turn_around_time_reply_days} "
             message1 += "days to respond to the bug report"
@@ -197,8 +202,8 @@ def commit_in_last_year(commits_url: str, headers: dict) -> str:
     """
     r = requests.get(commits_url, headers=headers).json()
     last_commit_date = r.get("commit").get("author").get("date")
-    last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
-    days_since_last_commit = (datetime.utcnow() - last_commit_date).days
+    last_commit_date = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    days_since_last_commit = (datetime.now(timezone.utc) - last_commit_date).days
     if days_since_last_commit > 365:
         message = f"[red]No. The last commit was {days_since_last_commit} days ago"
     else:
@@ -216,8 +221,8 @@ def release_in_last_year(pypi_api_url: str) -> str:
     releases = _get_release_date(r)
     last_release_date = releases[0].upload_time
     version = releases[0].version
-    last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%S")
-    days_since_last_release = (datetime.utcnow() - last_release_date).days
+    last_release_date = datetime.strptime(last_release_date, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+    days_since_last_release = (datetime.now(timezone.utc) - last_release_date).days
     if days_since_last_release > 365:
         message = f"[red]No. Version {version} was last released {days_since_last_release} days ago"
     else:
