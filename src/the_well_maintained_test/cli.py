@@ -109,7 +109,7 @@ def questions(name: str, question: str, auth_string: str) -> None:  # pragma: no
         urls = toml.load(file)
 
     try:
-        with open(auth) as f:
+        with open("auth.json") as f:
             data = json.load(f)
         headers = {
             "Authorization": f'token {data["github_personal_token"]}',

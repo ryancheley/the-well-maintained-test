@@ -3,25 +3,20 @@ ci:
   autoupdate_schedule: monthly
 
 repos:
--   repo: https://github.com/psf/black
-    rev: 25.1.0
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
     hooks:
-    - id: black
-      language_version: python3.11
--   repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
-    hooks:
-    - id: flake8
--   repo: https://github.com/pycqa/isort
-    rev: 6.0.1
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-        name: isort (python)
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
     - id: trailing-whitespace
+      language_version: python3.9
     - id: end-of-file-fixer
+      language_version: python3.9
     - id: check-yaml
+      language_version: python3.9
     - id: check-added-large-files
+      language_version: python3.9

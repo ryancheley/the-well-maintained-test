@@ -1,5 +1,76 @@
-[tool.black]
+[project]
+name = "the-well-maintained-test"
+dynamic = ["version"]
+description = "Programatically tries to answer the 12 questions from Adam Johnson's blog post https://adamj.eu/tech/2021/11/04/the-well-maintained-test/"
+readme = "README.md"
+authors = [{name = "Ryan Cheley"}]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 4 - Beta"
+]
+dependencies = [
+    "click",
+    "importlib-resources",
+    "requests",
+    "rich",
+    "toml"
+]
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project.urls]
+Issues = "https://github.com/ryancheley/the-well-maintained-test/issues"
+CI = "https://github.com/ryancheley/the-well-maintained-test/actions"
+Changelog = "https://github.com/ryancheley/the-well-maintained-test/releases"
+
+[project.scripts]
+the-well-maintained-test = "the_well_maintained_test.cli:cli"
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "coverage",
+    "mypy",
+]
+docs = [
+    "mkdocs",
+    "mkdocstrings[python]",
+    "markdown-include",
+]
+dev = [
+    "packaging",
+    "ruff",
+    "cogapp",
+    "build>=1.2.2.post1",
+    "pre-commit>=4.2.0",
+    "twine>=6.1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.6.3"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/the_well_maintained_test/_version.py"
+
+[tool.ruff]
 line-length = 130
-target-version = ['py311']
-include = '\.pyi?$'
-exclude = '(venv)'
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"*/_version.py" = ["UP035", "UP006", "I001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

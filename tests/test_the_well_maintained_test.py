@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from time import localtime, strftime
 
 import pytest
@@ -145,6 +145,75 @@ def test_bug_response_yes(monkeypatch):
     message2 = f"It has been {days_since_last_bug_comment} days since a comment was made on the bug."
     actual = f"[green]{message1}\n{message2}"
     assert expected == actual
+
+
+def test_bug_response_timezone_aware_date(monkeypatch):
+    """
+    Test the timezone-aware branch (line 81) in bug_responding function.
+    """
+    headers = {}
+
+    def mock_get_bug_comment(url, headers=headers):
+        BugComments = namedtuple("BugComments", ["text", "create_date"])
+        # Return timezone-aware datetime to trigger else branch at line 81  
+        return [BugComments(text="Test", create_date=datetime(2019, 7, 15, 12, 0, 0, tzinfo=timezone.utc))]
+
+    # Custom mock that returns timezone-aware bug_create_date
+    class MockResponseBugsTimezoneAware:
+        @staticmethod  
+        def json():
+            return [
+                {
+                    "id": 1,
+                    "created_at": "2019-07-14T00:00:00Z", 
+                    "timeline_url": "https://fakeurl/17/timeline",
+                }
+            ]
+
+    def mock_get(*args, **kwargs):
+        return MockResponseBugsTimezoneAware()
+
+    # Mock the datetime strptime to return timezone-aware datetime
+    original_strptime = datetime.strptime
+    def mock_strptime(date_string, format_string):
+        dt = original_strptime(date_string, format_string) 
+        if format_string == "%Y-%m-%dT%H:%M:%SZ":
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
+    # Monkey patch using monkeypatch (even though it's tricky with datetime)
+    import the_well_maintained_test.utils
+    # Store original
+    original_datetime_class = the_well_maintained_test.utils.datetime
+    
+    # Create a mock datetime class
+    class MockDatetime:
+        @staticmethod
+        def strptime(date_string, format_string):
+            dt = original_strptime(date_string, format_string)
+            if format_string == "%Y-%m-%dT%H:%M:%SZ":
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
+        
+        @staticmethod    
+        def now(tz=None):
+            return original_datetime_class.now(tz)
+    
+    # Replace in module
+    the_well_maintained_test.utils.datetime = MockDatetime
+    
+    try:
+        monkeypatch.setattr(requests, "get", mock_get)
+        monkeypatch.setattr("the_well_maintained_test.utils._get_bug_comment_list", mock_get_bug_comment)
+        
+        url = "https://fakeurl/17/timeline"
+        expected = bug_responding(url, headers=headers)
+        
+        assert expected.startswith("[green]")
+        assert "days to respond to the bug report" in expected
+
+    finally:
+        the_well_maintained_test.utils.datetime = original_datetime_class
 
 
 def test__get_bug_comment_list(monkeypatch):

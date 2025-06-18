@@ -4,9 +4,7 @@
 [![Changelog](https://img.shields.io/github/v/release/ryancheley/the-well-maintained-test?include_prereleases&label=changelog)](https://github.com/ryancheley/the-well-maintained-test/releases)
 [![Tests](https://github.com/ryancheley/the-well-maintained-test/workflows/Test/badge.svg)](https://github.com/ryancheley/the-well-maintained-test/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/ryancheley/the-well-maintained-test/blob/master/LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-[![Imports: flake8](https://img.shields.io/badge/%20imports-flake8-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/flake8/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/ryancheley/the-well-maintained-test/main.svg)](https://results.pre-commit.ci/latest/github/ryancheley/the-well-maintained-test/main)
 
 
@@ -15,9 +13,15 @@ Programatically tries to answer the 12 questions from Adam Johnson's [blog post]
 
 ## Installation
 
+### uv (recommended)
+
+The preferred method of installation for this tool is [uv](https://docs.astral.sh/uv/).
+
+    uv tool install the-well-maintained-test
+
 ### pipx
 
-The preferred method of installation for this tool is [pipx](https://pypa.github.io/pipx/).
+Alternatively, you can use [pipx](https://pypa.github.io/pipx/).
 
     pipx install the-well-maintained-test
 
@@ -82,29 +86,53 @@ Commands:
 
 ## Development
 
-To contribute to this tool, first checkout the code. Then create a new virtual environment:
+To contribute to this tool, first checkout the code. This project uses [uv](https://docs.astral.sh/uv/) for modern Python dependency management.
+
+### Using uv (recommended)
+
+    cd the-well-maintained-test
+    uv sync --extra test
+
+This will create a virtual environment and install all dependencies including test dependencies.
+
+To run the tests:
+
+    uv run pytest
+
+### Alternative: Traditional setup
+
+If you prefer not to use uv, you can still use traditional tools:
 
     cd the-well-maintained-test
     python3 -m venv venv
     source venv/bin/activate
-
-Or if you are using `pipenv`:
-
-    pipenv shell
-
-Now install the dependencies and test dependencies:
-
     pip install -e '.[test]'
 
 To run the tests:
 
     just test
 
+### Development commands
+
+With uv:
+
+    # Run the CLI tool
+    uv run the-well-maintained-test --help
+
+    # Run tests
+    uv run pytest
+
+    # Run mypy
+    uv run mypy src/the_well_maintained_test/*.py --no-strict-optional
+
+    # Install development dependencies
+    uv sync --extra dev
+
+The commands below use the command runner [just](https://github.com/casey/just). If you would rather not use `just` the raw commands are also listed above.
+
 To run `mypy` command you'll need to run
 
     mypy --install-types
-
-The commands below use the command runner [just](https://github.com/casey/just). If you would rather not use `just` the raw commands are also listed below
 
 Then, to run mypy:
 

@@ -4,7 +4,6 @@ from collections import namedtuple
 from datetime import datetime
 from operator import attrgetter
 from pathlib import Path
-from typing import List
 from urllib.parse import urlparse
 
 import requests
@@ -55,7 +54,7 @@ def _get_test_files(url: str, headers: dict) -> list:
     return test_file_list
 
 
-def _get_release_date(release: dict) -> List:
+def _get_release_date(release: dict) -> list:
     Release = namedtuple("Release", "version, upload_time")
     releases = []
     for k, v in release.items():
@@ -68,7 +67,7 @@ def _get_release_date(release: dict) -> List:
     return releases
 
 
-def _get_requirements_txt_file(requirements_file: Path) -> List:
+def _get_requirements_txt_file(requirements_file: Path) -> list:
     with open(requirements_file) as f:
         requirements = f.readlines()
     packages = [s.replace("\n", "").replace("==", " ").split(" ")[0] for s in requirements]
