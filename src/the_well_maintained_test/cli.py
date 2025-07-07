@@ -112,7 +112,7 @@ def questions(name: str, question: str, auth_string: str) -> None:  # pragma: no
         with open("auth.json") as f:
             data = json.load(f)
         headers = {
-            "Authorization": f'token {data["github_personal_token"]}',
+            "Authorization": f"token {data['github_personal_token']}",
         }
     except FileNotFoundError:
         headers = {}
@@ -131,7 +131,7 @@ def questions(name: str, question: str, auth_string: str) -> None:  # pragma: no
                 )
             )
             question_link_verbiage = (
-                f'See {questions.get("question").get(question).get("question_link")} for the original source.'
+                f"See {questions.get('question').get(question).get('question_link')} for the original source."
             )
             console.print(question_link_verbiage, style=answer_link_style)
             if name:
@@ -229,7 +229,7 @@ def check(resource: str, auth, auth_string):  # pragma: no cover
         with open(auth) as f:
             data = json.load(f)
         headers = {
-            "Authorization": f'token {data["github_personal_token"]}',
+            "Authorization": f"token {data['github_personal_token']}",
         }
     except FileNotFoundError:
         headers = {}
@@ -289,7 +289,7 @@ def package(package: str, branch: str, progress: bool, output: str, auth, auth_s
         with open(auth) as f:
             data = json.load(f)
         headers = {
-            "Authorization": f'token {data["github_personal_token"]}',
+            "Authorization": f"token {data['github_personal_token']}",
         }
     except FileNotFoundError:
         headers = {}
