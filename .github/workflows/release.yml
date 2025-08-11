@@ -79,7 +79,7 @@ jobs:
         fi
         echo "Tag ${{ github.ref_name }} is on main branch. Proceeding with PyPI publish."
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: python-package-distributions
         path: dist/
@@ -96,7 +96,7 @@ jobs:
       id-token: write
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: python-package-distributions
         path: dist/
@@ -135,7 +135,7 @@ jobs:
       id-token: write
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: python-package-distributions
         path: dist/
