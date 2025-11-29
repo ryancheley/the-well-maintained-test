@@ -13,10 +13,10 @@ repos:
     rev: v6.0.0
     hooks:
     - id: trailing-whitespace
-      language_version: python3.9
+      language_version: python3.12
     - id: end-of-file-fixer
-      language_version: python3.9
+      language_version: python3.12
     - id: check-yaml
-      language_version: python3.9
+      language_version: python3.12
     - id: check-added-large-files
-      language_version: python3.9
+      language_version: python3.12
