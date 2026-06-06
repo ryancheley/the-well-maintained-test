@@ -15,7 +15,7 @@ dependencies = [
     "rich",
     "toml"
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -49,6 +49,19 @@ dev = [
     "pre-commit>=4.2.0",
     "twine>=6.1.0",
 ]
+
+# Dependency groups are synced automatically by `uv run`/`uv sync`, so local
+# tooling (e.g. `just test`) finds these without needing `--extra test`.
+# The `test` extra above is retained for CI, which installs via pip/uv extras.
+[dependency-groups]
+test = [
+    "pytest",
+    "coverage",
+    "mypy",
+]
+
+[tool.uv]
+default-groups = ["test"]
 
 [tool.hatch.build.targets.wheel]
 sources = ["src"]
