@@ -7,9 +7,9 @@ test:
     uv run coverage html
     open htmlcov/index.html
 
-# runs the pre-commit check command
+# runs the prek check command
 check: lint mypy
-    pre-commit run --all-files
+    prek run --all-files
 
 # run ruff linting and formatting
 lint:
@@ -49,5 +49,5 @@ sync branch:
     git switch {{branch}}
     git pull origin {{branch}}
 
-pre-commit:
-    pre-commit run --all-files
+prek:
+    prek run --all-files
