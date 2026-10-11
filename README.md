@@ -5,7 +5,6 @@
 [![Tests](https://github.com/ryancheley/the-well-maintained-test/workflows/Test/badge.svg)](https://github.com/ryancheley/the-well-maintained-test/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/ryancheley/the-well-maintained-test/blob/master/LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/ryancheley/the-well-maintained-test/main.svg)](https://results.pre-commit.ci/latest/github/ryancheley/the-well-maintained-test/main)
 
 
 
@@ -148,7 +147,7 @@ You can also do a pre-commit check on the files by running
 
 OR the raw commands are
 
-    pre-commit run --all-files
+    prek run --all-files
     mypy src/the_well_maintained_test/*.py --no-strict-optional
 
-This will run several pre-commit hooks, but before that it will run `mypy`
+This will run several [prek](https://github.com/j178/prek) hooks, but before that it will run `mypy`
