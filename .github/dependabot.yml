@@ -6,6 +6,8 @@ updates:
       interval: "monthly"
       day: "friday"
       time: "09:00"
+    cooldown:
+      default-days: 7
     groups:
         python-packages:
           patterns:
@@ -20,6 +22,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     groups:
       github-actions:
         patterns:

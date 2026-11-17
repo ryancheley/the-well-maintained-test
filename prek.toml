@@ -40,3 +40,8 @@ hooks = [
 repo = "https://github.com/gitleaks/gitleaks"
 rev = "v8.30.1"
 hooks = [{ id = "gitleaks" }]
+
+[[repos]]
+repo = "https://github.com/zizmorcore/zizmor-pre-commit"
+rev = "v1.32.0"
+hooks = [{ id = "zizmor" }]
