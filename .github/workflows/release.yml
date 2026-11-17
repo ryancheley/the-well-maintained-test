@@ -51,7 +51,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v7.6.0
+      uses: astral-sh/setup-uv@v10.3.3
       with:
         enable-cache: false
     - name: Install dependencies
@@ -93,7 +93,7 @@ jobs:
         name: python-package-distributions
         path: dist/
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.14.2
+      uses: pypa/gh-action-pypi-publish@v1.14.3
 
   github-release:
     name: Create Github Release
@@ -149,7 +149,7 @@ jobs:
         name: python-package-distributions
         path: dist/
     - name: Publish distribution to TestPyPI
-      uses: pypa/gh-action-pypi-publish@v1.14.2
+      uses: pypa/gh-action-pypi-publish@v1.14.3
       with:
         repository-url: https://test.pypi.org/legacy/
         skip-existing: true
